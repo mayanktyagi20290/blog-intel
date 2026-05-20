@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Blog Intel — Competitor Content Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --nav-w:220px;
+  --topbar-h:52px;
+  --white:#ffffff;
+  --bg:#f4f5f7;
+  --sidebar-bg:#1e2433;
+  --sidebar-hover:#2a3245;
+  --sidebar-active:#ff6b35;
+  --ink:#1a1f36;
+  --ink2:#3c4257;
+  --ink3:#6b7280;
+  --ink4:#9ca3af;
+  --border:#e5e7eb;
+  --border2:#d1d5db;
+  --blue:#2563eb;
+  --blue-lt:#eff6ff;
+  --orange:#f97316;
+  --orange-lt:#fff7ed;
+  --green:#16a34a;
+  --green-lt:#f0fdf4;
+  --purple:#7c3aed;
+  --purple-lt:#f5f3ff;
+  --red:#dc2626;
+  --red-lt:#fef2f2;
+  --amber:#d97706;
+  --amber-lt:#fffbeb;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.08);
+  --shadow:0 2px 8px rgba(0,0,0,.1);
+  --shadow-md:0 4px 16px rgba(0,0,0,.12);
+  --radius:8px;
+  --radius-sm:6px;
+  --radius-lg:12px;
+  --font:'Inter',system-ui,sans-serif;
+}
+html,body{height:100%;font-family:var(--font);font-size:14px;color:var(--ink);background:var(--bg)}
+
+/* ══ TOP BAR ══ */
+.topbar{
+  position:fixed;top:0;left:0;right:0;height:var(--topbar-h);
+  background:var(--white);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 20px 0 0;
+  z-index:1000;gap:0
+}
+.topbar-logo{
+  width:var(--nav-w);flex-shrink:0;
+  display:flex;align-items:center;gap:10px;
+  padding:0 20px;border-right:1px solid var(--border);height:100%
+}
+.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,#f97316,#e8440a);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;flex-shrink:0}
+.logo-text{font-size:14px;font-weight:700;color:var(--ink);letter-spacing:-.02em}
+.logo-text span{color:var(--orange)}
+.topbar-search{flex:1;max-width:480px;margin:0 24px;position:relative}
+.topbar-search input{
+  width:100%;height:36px;border:1px solid var(--border2);border-radius:var(--radius-sm);
+  padding:0 12px 0 36px;font-size:13px;color:var(--ink);background:var(--bg);
+  outline:none;transition:.15s;font-family:var(--font)
+}
+.topbar-search input:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.topbar-search .search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--ink4);font-size:15px}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:14px}
+.topbar-badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:var(--orange-lt);color:var(--orange);border:1px solid #fed7aa;letter-spacing:.02em}
+.topbar-date{font-size:12px;color:var(--ink3)}
+.topbar-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#2563eb,#7c3aed);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:600}
+
+/* ══ LEFT NAV ══ */
+.sidenav{
+  position:fixed;top:var(--topbar-h);left:0;bottom:0;
+  width:var(--nav-w);background:var(--sidebar-bg);
+  overflow-y:auto;z-index:900;padding:12px 0
+}
+.nav-section-label{
+  font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  color:#6b7a9a;padding:16px 16px 6px;margin-top:4px
+}
+.nav-section-label:first-child{margin-top:0}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 16px;cursor:pointer;transition:.12s;
+  color:#a8b3cf;font-size:13px;font-weight:500;
+  border-left:3px solid transparent;margin:1px 0
+}
+.nav-item:hover{background:var(--sidebar-hover);color:#e2e8f0}
+.nav-item.active{background:rgba(249,115,22,.12);color:#fff;border-left-color:var(--orange)}
+.nav-item-icon{font-size:16px;width:18px;flex-shrink:0;text-align:center}
+.nav-sub{padding-left:44px;font-size:12px;padding-top:5px;padding-bottom:5px;color:#6b7a9a;cursor:pointer;transition:.12s}
+.nav-sub:hover{color:#a8b3cf}
+.nav-sub.active{color:#f97316;font-weight:500}
+
+/* ══ MAIN AREA ══ */
+.main-wrap{
+  margin-left:var(--nav-w);
+  margin-top:var(--topbar-h);
+  min-height:calc(100vh - var(--topbar-h));
+}
+
+/* ══ PAGE HEADER ══ */
+.page-header{
+  background:var(--white);border-bottom:1px solid var(--border);
+  padding:20px 28px 0
+}
+.page-title{font-size:22px;font-weight:700;color:var(--ink);margin-bottom:4px}
+.page-subtitle{font-size:13px;color:var(--ink3);margin-bottom:16px;line-height:1.5}
+.page-tabs{display:flex;gap:0;border-bottom:none}
+.page-tab{
+  padding:10px 18px;font-size:13px;font-weight:500;color:var(--ink3);
+  cursor:pointer;border-bottom:2px solid transparent;transition:.12s;
+  white-space:nowrap
+}
+.page-tab:hover{color:var(--ink2)}
+.page-tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:600}
+
+/* ══ CONTENT ══ */
+.content-area{padding:24px 28px}
+
+/* ══ SITE SELECTOR CARD ══ */
+.site-select-card{
+  background:var(--white);border-radius:var(--radius-lg);border:1px solid var(--border);
+  padding:24px 28px;margin-bottom:20px;box-shadow:var(--shadow-sm)
+}
+.site-select-title{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:6px}
+.site-select-sub{font-size:13px;color:var(--ink3);margin-bottom:20px}
+.site-input-row{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.site-pills{display:flex;gap:8px;flex-wrap:wrap}
+.site-pill{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 16px;border:1.5px solid var(--border2);border-radius:var(--radius-sm);
+  cursor:pointer;transition:.15s;background:var(--white);min-width:160px
+}
+.site-pill:hover{border-color:var(--blue);background:var(--blue-lt)}
+.site-pill.active{border-color:var(--blue);background:var(--blue-lt);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.site-pill-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.site-pill-info{}
+.site-pill-name{font-size:13px;font-weight:600;color:var(--ink)}
+.site-pill-url{font-size:11px;color:var(--ink3);margin-top:1px}
+.site-pill.active .site-pill-name{color:var(--blue)}
+.date-section{display:flex;flex-direction:column;gap:6px}
+.date-label{font-size:12px;font-weight:500;color:var(--ink3)}
+.date-quick{display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap}
+.dq-btn{
+  font-size:12px;font-weight:500;padding:5px 12px;
+  border:1px solid var(--border2);border-radius:20px;
+  background:var(--white);color:var(--ink3);cursor:pointer;transition:.12s
+}
+.dq-btn:hover{border-color:var(--blue);color:var(--blue)}
+.dq-btn.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.date-inputs-row{display:flex;gap:8px;align-items:center}
+.date-inputs-row span{font-size:12px;color:var(--ink3)}
+.date-inp{
+  height:34px;padding:0 10px;border:1px solid var(--border2);border-radius:var(--radius-sm);
+  font-size:12px;color:var(--ink);font-family:var(--font);outline:none;background:var(--white);
+  transition:.12s;cursor:pointer
+}
+.date-inp:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.run-button{
+  height:40px;padding:0 24px;
+  background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;
+  border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:600;
+  cursor:pointer;transition:.15s;display:flex;align-items:center;gap:8px;
+  font-family:var(--font);white-space:nowrap;flex-shrink:0;box-shadow:var(--shadow-sm)
+}
+.run-button:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+.run-button:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.spin{width:13px;height:13px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:sp .6s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ══ STATS STRIP ══ */
+.stats-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.stat-card{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:18px 20px;
+  box-shadow:var(--shadow-sm);position:relative;overflow:hidden
+}
+.stat-card-accent{
+  position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius-lg) var(--radius-lg) 0 0
+}
+.stat-card-icon{
+  width:36px;height:36px;border-radius:var(--radius-sm);
+  display:flex;align-items:center;justify-content:center;font-size:17px;
+  margin-bottom:12px;flex-shrink:0
+}
+.stat-value{font-size:28px;font-weight:700;color:var(--ink);line-height:1;margin-bottom:4px}
+.stat-label{font-size:12px;color:var(--ink3);font-weight:500}
+.stat-delta{font-size:11px;margin-top:4px}
+.stat-delta.up{color:var(--green)}
+.stat-delta.neu{color:var(--ink3)}
+
+/* ══ TWO-COL GRID ══ */
+.two-col{display:grid;grid-template-columns:1fr 300px;gap:16px;margin-bottom:20px}
+
+/* ══ CARD ══ */
+.card{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:20px 22px;
+  box-shadow:var(--shadow-sm)
+}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-title{font-size:14px;font-weight:600;color:var(--ink)}
+.card-subtitle{font-size:12px;color:var(--ink3);margin-top:2px}
+.card-badge{font-size:11px;font-weight:500;padding:3px 8px;border-radius:4px;border:1px solid}
+.card-full{margin-bottom:20px}
+
+/* ══ INSIGHT BANNER ══ */
+.insight-card{
+  background:linear-gradient(135deg,#eff6ff,#f0f9ff);
+  border:1px solid #bfdbfe;border-radius:var(--radius-lg);
+  padding:16px 20px;margin-bottom:20px;
+  display:flex;gap:14px;align-items:flex-start;box-shadow:var(--shadow-sm)
+}
+.insight-icon-wrap{
+  width:36px;height:36px;background:#2563eb;border-radius:var(--radius-sm);
+  display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0
+}
+.insight-title{font-size:13px;font-weight:600;color:#1e40af;margin-bottom:3px}
+.insight-body{font-size:13px;color:#1d4ed8;line-height:1.6}
+
+/* ══ TIMELINE ══ */
+.tl-bars{display:flex;align-items:flex-end;gap:5px;height:90px;padding-bottom:22px;overflow-x:auto}
+.tl-bw{flex-shrink:0;min-width:22px;max-width:50px;flex:1;display:flex;flex-direction:column;align-items:center;position:relative;cursor:pointer}
+.tl-b{width:100%;background:#e0e7ff;border-radius:4px 4px 0 0;min-height:3px;transition:.12s}
+.tl-bw:hover .tl-b{background:var(--blue)}
+.tl-v{font-size:8px;color:var(--ink3);position:absolute;top:-14px;white-space:nowrap}
+.tl-bw:hover .tl-v{color:var(--blue)}
+.tl-l{font-size:8px;color:var(--ink4);position:absolute;bottom:-18px;white-space:nowrap;transform:rotate(-30deg);transform-origin:top center}
+
+/* ══ CAT BARS ══ */
+.cat-rows{display:flex;flex-direction:column;gap:10px}
+.cat-r{display:flex;flex-direction:column;gap:3px}
+.cat-r-meta{display:flex;justify-content:space-between;align-items:center}
+.cat-r-name{font-size:12px;color:var(--ink2);font-weight:500}
+.cat-r-count{font-size:11px;color:var(--ink3);font-variant-numeric:tabular-nums}
+.cat-r-track{height:6px;background:var(--bg);border-radius:3px;overflow:hidden}
+.cat-r-fill{height:100%;border-radius:3px;transition:width .8s ease}
+
+/* ══ DONUT / LEGEND ══ */
+.legend-list{display:flex;flex-direction:column;gap:8px}
+.legend-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)}
+.legend-row:last-child{border-bottom:none}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.legend-name{font-size:12px;color:var(--ink2);flex:1}
+.legend-pct{font-size:12px;color:var(--ink3);font-weight:500;font-variant-numeric:tabular-nums}
+.legend-count{font-size:11px;color:var(--ink4);font-variant-numeric:tabular-nums;min-width:28px;text-align:right}
+
+/* ══ CLUSTERS ══ */
+.cluster-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-bottom:20px}
+.cluster-card{
+  background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:14px 16px;cursor:pointer;transition:.15s;box-shadow:var(--shadow-sm)
+}
+.cluster-card:hover{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.08);transform:translateY(-1px)}
+.cluster-card.on{border-color:var(--blue);background:var(--blue-lt)}
+.cc-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px}
+.cc-name{font-size:13px;font-weight:600;color:var(--ink)}
+.cc-badge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--blue-lt);color:var(--blue)}
+.cc-date{font-size:11px;color:var(--ink3);margin-bottom:8px}
+.cc-tags{display:flex;flex-wrap:wrap;gap:4px}
+.cc-tag{font-size:10px;padding:2px 7px;border-radius:4px;background:var(--bg);color:var(--ink3);border:1px solid var(--border)}
+
+/* ══ TABLE ══ */
+.table-toolbar{display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap}
+.tbl-srch{
+  flex:1;min-width:200px;height:36px;
+  border:1px solid var(--border2);border-radius:var(--radius-sm);
+  padding:0 12px 0 36px;font-size:13px;color:var(--ink);
+  background:var(--white);outline:none;font-family:var(--font);transition:.12s
+}
+.tbl-srch:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.tbl-srch::placeholder{color:var(--ink4)}
+.tbl-srch-wrap{position:relative;flex:1;min-width:200px}
+.tbl-srch-wrap .sico{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--ink4);font-size:14px}
+.tbl-sel{
+  height:36px;padding:0 10px;border:1px solid var(--border2);border-radius:var(--radius-sm);
+  font-size:13px;color:var(--ink2);background:var(--white);outline:none;cursor:pointer;
+  font-family:var(--font)
+}
+.tbl-action{
+  height:36px;padding:0 14px;border:1px solid var(--border2);border-radius:var(--radius-sm);
+  font-size:13px;color:var(--ink2);background:var(--white);cursor:pointer;
+  display:flex;align-items:center;gap:6px;transition:.12s;font-family:var(--font);white-space:nowrap
+}
+.tbl-action:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-lt)}
+.filter-note{font-size:12px;color:var(--ink3);margin-bottom:8px}
+
+.tbl-wrap{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-sm)}
+.tbl-head{display:grid;grid-template-columns:44px 1fr 100px 150px;background:var(--bg);border-bottom:1px solid var(--border)}
+.th-cell{
+  font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--ink3);padding:10px 12px;cursor:pointer;user-select:none;transition:.1s
+}
+.th-cell:hover{color:var(--ink2)}
+.tbl-body{max-height:500px;overflow-y:auto}
+.tr{display:grid;grid-template-columns:44px 1fr 100px 150px;border-bottom:1px solid var(--border);align-items:center;transition:background .1s}
+.tr:last-child{border-bottom:none}
+.tr:hover{background:#f8faff}
+.td-num{font-size:11px;color:var(--ink4);padding:11px 12px;font-variant-numeric:tabular-nums}
+.td-url{padding:11px 8px 11px 0;overflow:hidden}
+.td-url a{font-size:13px;color:var(--blue);text-decoration:none;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.td-url a:hover{text-decoration:underline}
+.td-slug{font-size:11px;color:var(--ink4);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.td-date{font-size:12px;color:var(--ink2);padding:11px 8px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.td-cat{padding:11px 8px}
+.cat-chip{font-size:11px;font-weight:500;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.new-chip{display:inline-block;font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;background:#dcfce7;color:#15803d;margin-left:5px;vertical-align:middle}
+.tbl-footer{padding:10px 14px;font-size:12px;color:var(--ink3);border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;display:none}
+
+/* ══ SECTION HEADING ══ */
+.sec-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sec-hd-left{display:flex;align-items:center;gap:10px}
+.sec-hd-title{font-size:15px;font-weight:600;color:var(--ink)}
+.sec-hd-count{font-size:12px;color:var(--ink3);background:var(--bg);padding:2px 8px;border-radius:20px;border:1px solid var(--border)}
+
+/* ══ EMPTY ══ */
+.empty-state{
+  background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:60px 40px;text-align:center;box-shadow:var(--shadow-sm)
+}
+.empty-illo{font-size:52px;margin-bottom:16px;opacity:.3}
+.empty-title{font-size:18px;font-weight:700;color:var(--ink);margin-bottom:8px}
+.empty-sub{font-size:13px;color:var(--ink3);max-width:340px;margin:0 auto;line-height:1.7}
+
+/* ══ PROGRESS ══ */
+.progress-wrap{margin-top:8px;display:none}
+.progress-track{height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#2563eb,#7c3aed);border-radius:2px;transition:width .3s ease}
+.progress-label{font-size:11px;color:var(--ink3);margin-top:4px}
+
+/* ══ SCROLLBAR ══ */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+::-webkit-scrollbar-thumb:hover{background:var(--ink4)}
+
+/* ══ ANIMATIONS ══ */
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.anim{animation:fadeIn .3s ease both}
+.anim-1{animation-delay:.04s}
+.anim-2{animation-delay:.08s}
+.anim-3{animation-delay:.12s}
+.anim-4{animation-delay:.16s}
+@keyframes countUp{from{opacity:0}to{opacity:1}}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:900px){
+  .main-wrap{margin-left:0}
+  .sidenav{display:none}
+  .two-col{grid-template-columns:1fr}
+  .stats-strip{grid-template-columns:1fr 1fr}
+  .tbl-head,.tr{grid-template-columns:36px 1fr 95px}
+  .th-cell:nth-child(4),.td-cat{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ TOP BAR ══ -->
+<div class="topbar">
+  <div class="topbar-logo">
+    <div class="logo-icon">BI</div>
+    <div>
+      <div class="logo-text">Blog<span>Intel</span></div>
+    </div>
+  </div>
+  <div class="topbar-search">
+    <span class="search-icon">🔍</span>
+    <input type="text" placeholder="Search competitor, topic, keyword…" id="global-search" oninput="globalSearch()">
+  </div>
+  <div class="topbar-right">
+    <span class="topbar-badge" id="topbar-status">Ready</span>
+    <span class="topbar-date">May 20, 2026</span>
+    <div class="topbar-avatar">SE</div>
+  </div>
+</div>
+
+<!-- ══ LEFT NAV ══ -->
+<nav class="sidenav">
+  <div class="nav-section-label">Competitor Analysis</div>
+  <div class="nav-item active" onclick="switchView('overview')">
+    <span class="nav-item-icon">📊</span> Blog Overview
+  </div>
+  <div class="nav-item" onclick="switchView('timeline')">
+    <span class="nav-item-icon">📅</span> Publishing Timeline
+  </div>
+  <div class="nav-item" onclick="switchView('clusters')">
+    <span class="nav-item-icon">🎯</span> Content Clusters
+  </div>
+  <div class="nav-item" onclick="switchView('table')">
+    <span class="nav-item-icon">📋</span> All Posts
+  </div>
+  <div class="nav-section-label">Sites</div>
+  <div class="nav-item" id="nav-naukri" onclick="quickSite('naukri')" style="border-left:3px solid #f97316;background:rgba(249,115,22,.08);color:#fbd38d">
+    <span style="width:8px;height:8px;border-radius:50%;background:#f97316;display:inline-block;flex-shrink:0"></span> Naukri.com
+  </div>
+  <div class="nav-item" id="nav-internshala" onclick="quickSite('internshala')">
+    <span style="width:8px;height:8px;border-radius:50%;background:#3b82f6;display:inline-block;flex-shrink:0"></span> Internshala.com
+  </div>
+  <div class="nav-section-label">Quick Ranges</div>
+  <div class="nav-sub active" onclick="quickRange(30)">Last 30 days</div>
+  <div class="nav-sub" onclick="quickRange(90)">Last 90 days</div>
+  <div class="nav-sub" onclick="quickRange(180)">Last 6 months</div>
+  <div class="nav-sub" onclick="quickRange(365)">Last 1 year</div>
+  <div class="nav-sub" onclick="quickRange(0)">All time</div>
+</nav>
+
+<!-- ══ MAIN ══ -->
+<div class="main-wrap">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-title">Blog Content Intelligence</div>
+    <div class="page-subtitle">Track competitor publishing activity by date range · Naukri.com & Internshala.com · Data as of May 20, 2026</div>
+    <div class="page-tabs">
+      <div class="page-tab active">Overview</div>
+      <div class="page-tab">Timeline</div>
+      <div class="page-tab">Clusters</div>
+      <div class="page-tab">All Posts</div>
+    </div>
+  </div>
+
+  <div class="content-area">
+
+    <!-- Site Selector Card -->
+    <div class="site-select-card">
+      <div class="site-select-title">Select Competitor & Date Range</div>
+      <div class="site-select-sub">Choose a site and set the time period to analyse their blog publishing activity</div>
+      <div class="site-input-row">
+        <div>
+          <div style="font-size:12px;font-weight:500;color:var(--ink3);margin-bottom:8px">COMPETITOR SITE</div>
+          <div class="site-pills">
+            <div class="site-pill active" data-k="naukri" onclick="pickSite(this)">
+              <span class="site-pill-dot" style="background:#f97316"></span>
+              <div class="site-pill-info">
+                <div class="site-pill-name">Naukri.com</div>
+                <div class="site-pill-url">107 posts in database</div>
+              </div>
+            </div>
+            <div class="site-pill" data-k="internshala" onclick="pickSite(this)">
+              <span class="site-pill-dot" style="background:#2563eb"></span>
+              <div class="site-pill-info">
+                <div class="site-pill-name">Internshala.com</div>
+                <div class="site-pill-url">35 posts in database</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="date-section" style="flex:1;min-width:280px">
+          <div style="font-size:12px;font-weight:500;color:var(--ink3);margin-bottom:8px">DATE RANGE</div>
+          <div class="date-quick">
+            <button class="dq-btn" onclick="setRange(7,this)">7 days</button>
+            <button class="dq-btn on" onclick="setRange(30,this)">30 days</button>
+            <button class="dq-btn" onclick="setRange(90,this)">90 days</button>
+            <button class="dq-btn" onclick="setRange(180,this)">6 months</button>
+            <button class="dq-btn" onclick="setRange(365,this)">1 year</button>
+            <button class="dq-btn" onclick="setRange(0,this)">All time</button>
+          </div>
+          <div class="date-inputs-row">
+            <input type="date" class="date-inp" id="df">
+            <span>→</span>
+            <input type="date" class="date-inp" id="dt">
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;justify-content:flex-end;gap:8px">
+          <button class="run-button" id="rbtn" onclick="runAnalysis()">
+            <span id="rico">▶</span>
+            <span id="rtxt">Get Data</span>
+          </button>
+          <div class="progress-wrap" id="pwrap">
+            <div class="progress-track"><div class="progress-fill" id="pfill" style="width:0%"></div></div>
+            <div class="progress-label" id="plabel"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results area -->
+    <div id="empty-state">
+      <div class="empty-state">
+        <div class="empty-illo">📊</div>
+        <div class="empty-title">Select a competitor and run analysis</div>
+        <div class="empty-sub">Choose Naukri or Internshala, set your date range, and click Get Data to see publishing activity, category breakdown, content clusters, and all posts.</div>
+      </div>
+    </div>
+    <div id="results-area" style="display:none"></div>
+
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════
+// ALL DATA
+// ══════════════════════════════════════════════════════════════════════
+const DB={
+naukri:[
+{u:"https://www.naukri.com/blog/formal-letter-format/",t:"Formal Letter Format",d:"2026-05-11",c:"Letters & Applications"},
+{u:"https://www.naukri.com/blog/what-is-stenographer/",t:"What Is a Stenographer?",d:"2026-05-11",c:"Career Basics"},
+{u:"https://www.naukri.com/blog/apology-letter-samples-and-tips-to-write-an-apology-letter/",t:"Apology Letter Samples & Tips",d:"2026-05-11",c:"Letters & Applications"},
+{u:"https://www.naukri.com/blog/application-for-sick-leave/",t:"Application for Sick Leave",d:"2026-05-11",c:"Letters & Applications"},
+{u:"https://www.naukri.com/blog/what-is-hr-human-resource/",t:"What Is HR (Human Resource)?",d:"2026-05-11",c:"Career Basics"},
+{u:"https://www.naukri.com/blog/what-is-ceo-full-meaning-salary-job-responsibilities/",t:"What Is CEO — Meaning, Salary & Responsibilities",d:"2026-05-08",c:"Career Basics"},
+{u:"https://www.naukri.com/blog/one-day-leave-application/",t:"One Day Leave Application",d:"2026-05-08",c:"Letters & Applications"},
+{u:"https://www.naukri.com/blog/what-is-designation/",t:"What Is Designation?",d:"2026-05-08",c:"Career Basics"},
+{u:"https://www.naukri.com/blog/what-is-btech-full-form-course-details/",t:"What Is BTech — Full Form & Course Details",d:"2026-05-08",c:"Career Basics"},
+{u:"https://www.naukri.com/blog/casual-leave-application/",t:"Casual Leave Application",d:"2026-05-08",c:"Letters & Applications"},
+{u:"https://www.naukri.com/blog/logical-reasoning-topics-and-meaning/",t:"Logical Reasoning Topics & Meaning",d:"2026-05-05",c:"Career Basics"},
+{u:"https://www.naukri.com/blog/naukri-premiumx-ai-powered-premium-talent-discovery/",t:"Naukri PremiumX — AI-Powered Talent Discovery",d:"2026-05-05",c:"Industry Reports"},
+{u:"https://www.naukri.com/blog/naukri-premiumx-ai-powered-premium-talent-discovery-2/",t:"Naukri PremiumX Part 2",d:"2026-04-28",c:"Industry Reports"},
+{u:"https://www.naukri.com/blog/introducing-ai-rex-naukris-agentic-ai-talent-sourcing-platform/",t:"Introducing AI Rex — Naukri's Agentic AI Platform",d:"2026-04-27",c:"Industry Reports"},
+{u:"https://www.naukri.com/blog/resdex-enterprise-search-smarter-reach-faster-and-operate-efficiently-2/",t:"Resdex Enterprise Search",d:"2026-04-17",c:"Industry Reports"},
+{u:"https://www.naukri.com/blog/50-women-hide-marriage-maternity-plans-amid-bias-fears/",t:"50% Women Hide Marriage & Maternity Plans Amid Bias Fears",d:"2026-04-09",c:"Women in Workplace"},
+{u:"https://www.naukri.com/blog/naukri-jobspeak-march-26-records-a-9-rise-in-white-collar-hiring-as-fy26-closes-at-8-the-strongest-job-growth-in-three-years/",t:"Naukri JobSpeak March '26 — 9% Rise in White-Collar Hiring",d:"2026-04-07",c:"Industry Reports"},
+{u:"https://www.naukri.com/blog/career-objective-or-resume-objective-samples/",t:"Career Objective / Resume Objective Samples",d:"2026-03-27",c:"Resume & Writing"},
+{u:"https://www.naukri.com/blog/naukri-jobspeak-it-hiring-shows-meaningful-recovery-and-ai-momentum-continues-white-collar-market-posts-12-yoy-growth-in-february-2026/",t:"Naukri JobSpeak — IT Hiring Recovery & 12% YOY Growth Feb '26",d:"2026-03-06",c:"Industry Reports"},
+{u:"https://www.naukri.com/blog/women-economic-empowerment/",t:"Women Economic Empowerment",d:"2026-02-26",c:"Women in Workplace"},
+{u:"https://www.naukri.com/blog/challenges-faced-by-women-in-workplace/",t:"Challenges Faced by Women in Workplace",d:"2026-02-26",c:"Women in Workplace"},
+{u:"https://www.naukri.com/blog/empowering-women-how-indian-companies-support-women/",t:"Empowering Women — How Indian Companies Support Them",d:"2026-02-26",c:"Women in Workplace"},
+{u:"https://www.naukri.com/blog/women-empowerment-in-rural-areas/",t:"Women Empowerment in Rural Areas",d:"2026-02-26",c:"Women in Workplace"},
+{u:"https://www.naukri.com/blog/career-advice-from-indian-women-leaders/",t:"Career Advice from Indian Women Leaders",d:"2026-02-26",c:"Women in Workplace"},
+{u:"https://www.naukri.com/blog/women-work-the-unfiltered-truth/",t:"Women at Work — The Unfiltered Truth",d:"2026-02-25",c:"Women in Workplace"},
+{u:"https://www.naukri.com/blog/exploring-the-great-breakup-on-international-womens-day/",t:"Exploring the Great Breakup on International Women's Day",d:"2026-02-25",c:"Women in Workplace"},
+{u:"https://www.naukri.com/blog/embrace-equity-on-international-womens-day/",t:"Embrace Equity on International Women's Day",d:"2026-02-25",c:"Women in Workplace"},
+{u:"https://www.naukri.com/blog/international-womens-day/",t:"International Women's Day",d:"2026-02-25",c:"Women in Workplace"},
+{u:"https://www.naukri.com/blog/accounting-interview-questions/",t:"Accounting Interview Questions",d:"2026-02-25",c:"Interview Prep"},
+{u:"https://www.naukri.com/blog/frequently-asked-hr-interview-questions-and-answers/",t:"Frequently Asked HR Interview Questions & Answers",d:"2026-02-25",c:"Interview Prep"},
+{u:"https://www.naukri.com/blog/naukri-jobspeak-white-collar-hiring-opens-2026-with-3-yoy-growth-driven-by-non-it-sectors-and-fresher-hiring/",t:"Naukri JobSpeak — White Collar Hiring Opens 2026 with 3% Growth",d:"2026-02-04",c:"Industry Reports"},
+{u:"https://www.naukri.com/blog/job-application-letter-samples/",t:"Job Application Letter Samples",d:"2026-01-29",c:"Letters & Applications"},
+{u:"https://www.naukri.com/blog/why-do-you-want-to-join-our-company/",t:"Why Do You Want to Join Our Company?",d:"2026-01-28",c:"Interview Prep"},
+{u:"https://www.naukri.com/blog/what-indias-gen-z-wants-from-work-and-why-employers-must-rethink/",t:"What India's Gen Z Wants from Work",d:"2026-01-27",c:"Career Advice"},
+{u:"https://www.naukri.com/blog/recruiting-process/",t:"Recruiting Process",d:"2026-01-27",c:"Industry Reports"},
+{u:"https://www.naukri.com/blog/what-is-leadership/",t:"What Is Leadership?",d:"2026-01-16",c:"Career Advice"},
+{u:"https://www.naukri.com/blog/how-to-become-a-project-manager/",t:"How to Become a Project Manager",d:"2026-01-16",c:"Tech & Career Paths"},
+{u:"https://www.naukri.com/blog/14-best-questions-to-ask-at-an-interview/",t:"14 Best Questions to Ask at an Interview",d:"2026-01-16",c:"Interview Prep"},
+{u:"https://www.naukri.com/blog/how-to-answer-how-do-you-handle-stress-and-pressure/",t:"How to Answer: How Do You Handle Stress?",d:"2026-01-16",c:"Interview Prep"},
+{u:"https://www.naukri.com/blog/tell-me-about-yourself-hr-interview-question-answers/",t:"Tell Me About Yourself — HR Interview Answers",d:"2026-01-16",c:"Interview Prep"},
+{u:"https://www.naukri.com/blog/how-to-explain-employment-gap-on-resume-with-samples/",t:"How to Explain Employment Gap on Resume",d:"2026-01-16",c:"Interview Prep"},
+{u:"https://www.naukri.com/blog/what-motivates-you-to-do-a-good-job/",t:"What Motivates You to Do a Good Job?",d:"2026-01-16",c:"Interview Prep"},
+{u:"https://www.naukri.com/blog/how-to-answer-why-are-you-looking-for-a-job-change/",t:"Why Are You Looking for a Job Change?",d:"2026-01-16",c:"Interview Prep"},
+{u:"https://www.naukri.com/blog/what-are-your-strengths-and-weaknesses-interview-question/",t:"What Are Your Strengths & Weaknesses?",d:"2026-01-16",c:"Interview Prep"},
+{u:"https://www.naukri.com/blog/high-paying-skills-in-india/",t:"High Paying Skills in India",d:"2026-01-14",c:"Salary & Finance"},
+{u:"https://www.naukri.com/blog/how-to-become-a-software-engineer/",t:"How to Become a Software Engineer",d:"2026-01-14",c:"Tech & Career Paths"},
+{u:"https://www.naukri.com/blog/digital-marketing-interview-questions/",t:"Digital Marketing Interview Questions",d:"2026-01-07",c:"Interview Prep"},
+{u:"https://www.naukri.com/blog/networking-interview-questions-and-answers/",t:"Networking Interview Questions & Answers",d:"2026-01-07",c:"Interview Prep"},
+{u:"https://www.naukri.com/blog/b-pharma-scope-and-career-opportunities/",t:"B.Pharma Scope & Career Opportunities",d:"2026-01-07",c:"Career Advice"},
+{u:"https://www.naukri.com/blog/how-to-write-an-introduction/",t:"How to Write an Introduction",d:"2026-01-07",c:"Resume & Writing"},
+{u:"https://www.naukri.com/blog/why-should-i-hire-you/",t:"Why Should I Hire You?",d:"2026-01-07",c:"Interview Prep"},
+{u:"https://www.naukri.com/blog/what-is-an-mis-report/",t:"What Is an MIS Report?",d:"2026-01-07",c:"Career Basics"},
+{u:"https://www.naukri.com/blog/naukri-jobspeak-white-collar-hiring-ends-2025-with-13-growth-in-december-making-oct-dec-the-years-strongest-quarter/",t:"Naukri JobSpeak — White Collar Hiring Ends 2025 with 13% Growth",d:"2026-01-07",c:"Industry Reports"},
+{u:"https://www.naukri.com/blog/naukri-jobspeak-white-collar-hiring-picks-up-pace-post-the-festive-lull-oct-nov-period-reports-dec-2025-consolidated-growth/",t:"Naukri JobSpeak — Hiring Picks Up Post-Festive Season",d:"2026-01-07",c:"Industry Reports"},
+{u:"https://www.naukri.com/blog/naukri-jobspeak-report-white-collar-job-market-sees-temporary-dip-in-october-2025-due-to-festive-clustering/",t:"Naukri JobSpeak — Temporary Dip in October 2025",d:"2026-01-07",c:"Industry Reports"},
+{u:"https://www.naukri.com/blog/understanding-hiring-trends-with-naukri-jobspeak-report-oct-2025/",t:"Understanding Hiring Trends — Oct 2025",d:"2026-01-07",c:"Industry Reports"},
+{u:"https://www.naukri.com/blog/understanding-hiring-trends-with-naukri-jobspeak-report-sep-2025/",t:"Understanding Hiring Trends — Sep 2025",d:"2026-01-07",c:"Industry Reports"},
+{u:"https://www.naukri.com/blog/understanding-hiring-trends-with-naukri-jobspeak-report-aug-2025/",t:"Understanding Hiring Trends — Aug 2025",d:"2026-01-07",c:"Industry Reports"},
+{u:"https://www.naukri.com/blog/interview-mistakes-to-avoid/",t:"Interview Mistakes to Avoid",d:"2026-01-05",c:"Interview Prep"},
+{u:"https://www.naukri.com/blog/reasons-for-job-change/",t:"Reasons for Job Change",d:"2026-01-02",c:"Career Advice"},
+{u:"https://www.naukri.com/blog/what-does-excise-inspector-do/",t:"What Does an Excise Inspector Do?",d:"2025-12-24",c:"Career Basics"},
+{u:"https://www.naukri.com/blog/how-to-write-a-job-leave-application-for-office-samples/",t:"How to Write a Leave Application for Office",d:"2025-12-22",c:"Letters & Applications"},
+{u:"https://www.naukri.com/blog/tips-and-strategies-for-a-successful-performance-appraisal/",t:"Tips for a Successful Performance Appraisal",d:"2025-12-22",c:"Career Advice"},
+{u:"https://www.naukri.com/blog/what-is-virtual-interview/",t:"What Is a Virtual Interview?",d:"2025-12-18",c:"Interview Prep"},
+{u:"https://www.naukri.com/blog/5-ways-to-increase-your-chances-of-getting-the-right-job/",t:"5 Ways to Increase Your Chances of Getting the Right Job",d:"2025-12-18",c:"Career Advice"},
+{u:"https://www.naukri.com/blog/10-must-have-soft-skills-for-a-fresher-to-find-a-perfect-job/",t:"10 Must-Have Soft Skills for Freshers",d:"2025-12-18",c:"Career Advice"},
+{u:"https://www.naukri.com/blog/how-to-negotiate-salary/",t:"How to Negotiate Salary",d:"2025-12-18",c:"Salary & Finance"},
+{u:"https://www.naukri.com/blog/how-to-prepare-for-a-walk-in-interview/",t:"How to Prepare for a Walk-In Interview",d:"2025-12-18",c:"Interview Prep"},
+{u:"https://www.naukri.com/blog/how-to-become-an-electrical-engineer/",t:"How to Become an Electrical Engineer",d:"2025-12-18",c:"Tech & Career Paths"},
+{u:"https://www.naukri.com/blog/high-paying-mechanical-engineering-roles-demand/",t:"High Paying Mechanical Engineering Roles",d:"2025-12-18",c:"Salary & Finance"},
+{u:"https://www.naukri.com/blog/how-upskilling-with-online-courses-help-you-to-grow-in-your-career-covid-article3/",t:"How Upskilling with Online Courses Helps Your Career",d:"2025-12-18",c:"Tech & Career Paths"},
+{u:"https://www.naukri.com/blog/6-ways-to-find-your-first-job-in-2023/",t:"6 Ways to Find Your First Job",d:"2025-12-18",c:"Career Advice"},
+{u:"https://www.naukri.com/blog/maternity-leave-application/",t:"Maternity Leave Application",d:"2025-12-18",c:"Letters & Applications"},
+{u:"https://www.naukri.com/blog/how-to-become-a-data-analyst/",t:"How to Become a Data Analyst",d:"2025-12-18",c:"Tech & Career Paths"},
+{u:"https://www.naukri.com/blog/a-step-by-step-guide-on-how-to-negotiate-a-raise/",t:"Step-by-Step Guide to Negotiate a Raise",d:"2025-12-18",c:"Salary & Finance"},
+{u:"https://www.naukri.com/blog/how-to-become-a-ui-ux-designer/",t:"How to Become a UI/UX Designer",d:"2025-12-18",c:"Tech & Career Paths"},
+{u:"https://www.naukri.com/blog/6-red-flags-to-notice-in-a-job-interview/",t:"6 Red Flags to Notice in a Job Interview",d:"2025-12-18",c:"Interview Prep"},
+{u:"https://www.naukri.com/blog/qualities-of-an-entrepreneur/",t:"Qualities of an Entrepreneur",d:"2025-12-18",c:"Career Advice"},
+{u:"https://www.naukri.com/blog/entrepreneurial-skills/",t:"Entrepreneurial Skills",d:"2025-12-18",c:"Career Advice"},
+{u:"https://www.naukri.com/blog/planning-a-career-move-here-is-your-ultimate-guide-to-plan-your-career/",t:"Planning a Career Move — Ultimate Guide",d:"2025-12-18",c:"Career Advice"},
+{u:"https://www.naukri.com/blog/how-to-set-your-career-goals/",t:"How to Set Your Career Goals",d:"2025-12-18",c:"Career Advice"},
+{u:"https://www.naukri.com/blog/what-to-do-when-recruiters-ghosts-you/",t:"What to Do When Recruiters Ghost You",d:"2025-12-18",c:"Career Advice"},
+{u:"https://www.naukri.com/blog/16-ways-to-maintain-work-life-balance/",t:"16 Ways to Maintain Work-Life Balance",d:"2025-12-18",c:"Career Advice"},
+{u:"https://www.naukri.com/blog/top-10-tips-for-a-successful-performance-appraisal/",t:"Top 10 Tips for Successful Performance Appraisal",d:"2025-12-18",c:"Career Advice"},
+{u:"https://www.naukri.com/blog/things-to-do-after-resigning/",t:"Things to Do After Resigning",d:"2025-12-18",c:"Career Advice"},
+{u:"https://www.naukri.com/blog/resignation-letter-due-to-working-conditions/",t:"Resignation Letter Due to Working Conditions",d:"2025-12-18",c:"Letters & Applications"},
+{u:"https://www.naukri.com/blog/dos-donts-of-serving-notice-period/",t:"Dos & Don'ts of Serving Notice Period",d:"2025-12-18",c:"Career Advice"},
+{u:"https://www.naukri.com/blog/understanding-hiring-trends-with-naukri-jobspeak-report-march-2025/",t:"Understanding Hiring Trends — March 2025",d:"2025-12-18",c:"Industry Reports"},
+{u:"https://www.naukri.com/blog/10-trending-technologies-for-an-it-professionals/",t:"10 Trending Technologies for IT Professionals",d:"2025-12-18",c:"Tech & Career Paths"},
+{u:"https://www.naukri.com/blog/how-to-prepare-for-a-promotion-interview/",t:"How to Prepare for a Promotion Interview",d:"2025-12-18",c:"Interview Prep"},
+{u:"https://www.naukri.com/blog/how-to-deal-with-imposter-syndrome-at-work/",t:"How to Deal with Imposter Syndrome at Work",d:"2025-12-18",c:"Career Advice"},
+{u:"https://www.naukri.com/blog/how-to-become-a-data-scientist/",t:"How to Become a Data Scientist",d:"2025-12-18",c:"Tech & Career Paths"},
+{u:"https://www.naukri.com/blog/what-are-data-scientist-roles-and-responsibilities/",t:"Data Scientist Roles & Responsibilities",d:"2025-12-18",c:"Tech & Career Paths"},
+{u:"https://www.naukri.com/blog/why-managing-emotions-at-work-matters/",t:"Why Managing Emotions at Work Matters",d:"2025-12-18",c:"Career Advice"},
+{u:"https://www.naukri.com/blog/leave-application/",t:"Leave Application",d:"2025-12-18",c:"Letters & Applications"},
+{u:"https://www.naukri.com/blog/how-to-answer-what-is-your-greatest-fear-with-sample-answers/",t:"How to Answer: What Is Your Greatest Fear?",d:"2025-12-18",c:"Interview Prep"},
+{u:"https://www.naukri.com/blog/lessons-women-learn-late-in-their-career/",t:"Lessons Women Learn Late in Their Career",d:"2025-12-18",c:"Women in Workplace"},
+{u:"https://www.naukri.com/blog/womens-role-in-transformative-leadership-leading-with-empathy/",t:"Women's Role in Transformative Leadership",d:"2025-12-18",c:"Women in Workplace"},
+{u:"https://www.naukri.com/blog/scope-of-artificial-intelligence/",t:"Scope of Artificial Intelligence",d:"2025-12-18",c:"Tech & Career Paths"},
+{u:"https://www.naukri.com/blog/how-does-emotional-intelligence-help-build-a-successful-career/",t:"How Emotional Intelligence Helps Your Career",d:"2025-12-17",c:"Career Advice"},
+{u:"https://www.naukri.com/blog/learn-top-10-in-demand-data-science-skills-covid-article3/",t:"Top 10 In-Demand Data Science Skills",d:"2025-12-17",c:"Tech & Career Paths"},
+{u:"https://www.naukri.com/blog/what-is-artificial-intelligence-how-to-make-a-career-in-it/",t:"What Is AI — How to Make a Career in It",d:"2025-12-17",c:"Tech & Career Paths"},
+{u:"https://www.naukri.com/blog/tips-to-prepare-for-a-possible-layoff-covid-article3/",t:"Tips to Prepare for a Possible Layoff",d:"2025-12-17",c:"Career Advice"},
+{u:"https://www.naukri.com/blog/how-to-handle-disappointment-on-not-getting-a-promotion/",t:"How to Handle Disappointment on Not Getting a Promotion",d:"2025-12-17",c:"Career Advice"},
+{u:"https://www.naukri.com/blog/how-to-coach-managers-on-effectively-leading-gen-z-employees-2/",t:"How to Coach Managers to Lead Gen Z Employees",d:"2025-12-17",c:"Career Advice"},
+{u:"https://www.naukri.com/blog/what-are-sales-promotions/",t:"What Are Sales Promotions?",d:"2025-12-17",c:"Career Advice"},
+{u:"https://www.naukri.com/blog/how-to-answer-what-motivates-you/",t:"How to Answer: What Motivates You?",d:"2025-12-17",c:"Interview Prep"},
+{u:"https://www.naukri.com/blog/what-are-the-product-manager-roles-and-responsibilities/",t:"Product Manager Roles & Responsibilities",d:"2025-12-11",c:"Tech & Career Paths"},
+{u:"https://www.naukri.com/blog/how-to-apply-for-jobs/",t:"How to Apply for Jobs",d:"2025-12-11",c:"Resume & Writing"},
+{u:"https://www.naukri.com/blog/what-is-a-data-analyst-role-and-responsibilities/",t:"Data Analyst Role & Responsibilities",d:"2025-12-11",c:"Tech & Career Paths"},
+{u:"https://www.naukri.com/blog/job-interview-tips/",t:"Job Interview Tips",d:"2025-12-11",c:"Interview Prep"},
+{u:"https://www.naukri.com/blog/email-writing/",t:"Email Writing",d:"2025-12-11",c:"Resume & Writing"},
+{u:"https://www.naukri.com/blog/10-unique-ways-to-deal-with-politics-at-workplace/",t:"10 Ways to Deal with Politics at Workplace",d:"2025-12-11",c:"Career Advice"}
+],
+internshala:[
+{u:"https://internshala.com/blog/nhrc-summer-winter-internship/",t:"NHRC Summer & Winter Internship 2026",d:"2026-05-19",c:"Internship Tips"},
+{u:"https://internshala.com/blog/employer-appointment-letters-for-a-pharmaceutical-company/",t:"Appointment Letters for a Pharmaceutical Company",d:"2026-05-19",c:"HR Resources"},
+{u:"https://internshala.com/blog/employer-appointment-letter-for-technician/",t:"Appointment Letter for a Technician",d:"2026-05-19",c:"HR Resources"},
+{u:"https://internshala.com/blog/employer-appointment-letter-for-hotel-manager/",t:"Appointment Letter for Hotel Manager",d:"2026-05-19",c:"HR Resources"},
+{u:"https://internshala.com/blog/employer-job-description-for-telecaller/",t:"Job Description for a Telecaller — Templates & Tips",d:"2026-05-19",c:"Hiring Tips"},
+{u:"https://internshala.com/blog/employer-indeed-job-posting-cost/",t:"Indeed Job Posting Cost — Comprehensive Guide",d:"2026-05-19",c:"HR Resources"},
+{u:"https://internshala.com/blog/employer-lawyer-appointment-letter/",t:"Lawyer Appointment Letter [with Template]",d:"2026-05-19",c:"HR Resources"},
+{u:"https://internshala.com/blog/employer-resume-collection-form/",t:"Resume Collection Form — Meaning & How to Create",d:"2026-05-19",c:"HR Resources"},
+{u:"https://internshala.com/blog/employer-how-to-post-a-job-on-indeed/",t:"How to Post a Job on Indeed",d:"2026-05-19",c:"HR Resources"},
+{u:"https://internshala.com/blog/network-engineer-resume/",t:"Network Engineer Resume Examples & Guide",d:"2026-05-19",c:"Resume Writing"},
+{u:"https://internshala.com/blog/devops-engineer-resume/",t:"DevOps Engineer Resume Examples & Guide",d:"2026-05-19",c:"Resume Writing"},
+{u:"https://internshala.com/blog/behavioral-interview-questions/",t:"Top 32 Behavioral Interview Questions (2026)",d:"2026-05-19",c:"Interview Guide"},
+{u:"https://internshala.com/blog/jobs-after-cfa/",t:"Top 10 Jobs After CFA",d:"2026-05-19",c:"Career Advice"},
+{u:"https://internshala.com/blog/how-to-get-a-job-in-sebi/",t:"How to Get a Job in SEBI",d:"2026-05-19",c:"Career Advice"},
+{u:"https://internshala.com/blog/how-to-get-a-job-in-drdo/",t:"How to Get a Job in DRDO",d:"2026-05-19",c:"Career Advice"},
+{u:"https://internshala.com/blog/it-intern-interview-questions/",t:"Top 50 IT Intern Interview Questions & Answers",d:"2026-05-19",c:"Interview Guide"},
+{u:"https://internshala.com/blog/resume-for-freshers-with-no-experience/",t:"Resume for Freshers With No Experience",d:"2026-05-19",c:"Resume Writing"},
+{u:"https://internshala.com/blog/employer-appointment-letter-for-a-teacher/",t:"Appointment Letter for a Teacher",d:"2026-05-19",c:"HR Resources"},
+{u:"https://internshala.com/blog/employer-appointment-letter-for-principal/",t:"Appointment Letter for Principal",d:"2026-05-19",c:"HR Resources"},
+{u:"https://internshala.com/blog/software-engineer-resume/",t:"Software Engineer Resume Examples with Template",d:"2026-05-19",c:"Resume Writing"},
+{u:"https://internshala.com/blog/employer-appointment-letter-for-marketing-executive/",t:"Appointment Letter for Marketing Executive",d:"2026-05-19",c:"HR Resources"},
+{u:"https://internshala.com/blog/ca-resume/",t:"Resume for Chartered Accountant (CA)",d:"2026-05-19",c:"Resume Writing"},
+{u:"https://internshala.com/blog/top-e-commerce-companies-in-india/",t:"Top E-Commerce Companies in India: 2026 Guide",d:"2026-05-19",c:"Career Advice"},
+{u:"https://internshala.com/blog/biotechnologist-salary-in-india/",t:"Biotechnologist Salary in India 2026",d:"2026-05-19",c:"Salary"},
+{u:"https://internshala.com/blog/employer-appointment-letter-for-marketing-manager/",t:"Appointment Letter for Marketing Manager",d:"2026-05-18",c:"HR Resources"},
+{u:"https://internshala.com/blog/employer-appointment-letter-for-a-medical-representative/",t:"Appointment Letter for a Medical Representative",d:"2026-05-18",c:"HR Resources"},
+{u:"https://internshala.com/blog/employer-auditor-appointment-letter/",t:"Auditor Appointment Letter — Comprehensive Guide",d:"2026-05-18",c:"HR Resources"},
+{u:"https://internshala.com/blog/employer-appointment-letter-for-safety-officer/",t:"Appointment Letter for a Safety Officer",d:"2026-05-18",c:"HR Resources"},
+{u:"https://internshala.com/blog/employer-appointment-letter-for-it-employee/",t:"Appointment Letter for an IT Employee",d:"2026-05-18",c:"HR Resources"},
+{u:"https://internshala.com/blog/employer-appointment-letter-for-consultant-doctors/",t:"Appointment Letter for Consultant Doctors",d:"2026-05-18",c:"HR Resources"},
+{u:"https://internshala.com/blog/best-work-from-home-jobs-for-women/",t:"16 Best Work From Home Jobs for Women (2026)",d:"2026-03-12",c:"Career Advice"},
+{u:"https://internshala.com/blog/nitty-gritty-of-resume-writing/",t:"How to Make a Resume for Any Job Profile",d:"2025-11-06",c:"Resume Writing"},
+{u:"https://internshala.com/blog/how-to-ask-for-an-interview-result/",t:"How to Ask for an Interview Result",d:"2025-11-06",c:"Interview Guide"},
+{u:"https://internshala.com/blog/kinds-of-internships-that-even-first-year-students-can-apply-to/",t:"8 Kinds of Internships First Year Students Can Apply To",d:"2025-11-06",c:"Internship Tips"},
+{u:"https://internshala.com/blog/14-common-hr-interview-questions-and-answers/",t:"14 Common HR Interview Questions & Answers",d:"2025-11-06",c:"Interview Guide"}
+]};
+
+// CATEGORY STYLES
+const CC={
+  'Interview Prep':    {bg:'#ede9fe',fg:'#5b21b6'},
+  'Letters & Applications':{bg:'#fff7ed',fg:'#c2410c'},
+  'Career Basics':     {bg:'#f0fdf4',fg:'#166534'},
+  'Industry Reports':  {bg:'#eff6ff',fg:'#1e40af'},
+  'Women in Workplace':{bg:'#fdf2f8',fg:'#86198f'},
+  'Resume & Writing':  {bg:'#f0fdfa',fg:'#115e59'},
+  'Tech & Career Paths':{bg:'#fff7ed',fg:'#92400e'},
+  'Salary & Finance':  {bg:'#fef2f2',fg:'#991b1b'},
+  'Career Advice':     {bg:'#f9fafb',fg:'#374151'},
+  'HR Resources':      {bg:'#eff6ff',fg:'#1e40af'},
+  'Resume Writing':    {bg:'#f0fdfa',fg:'#115e59'},
+  'Interview Guide':   {bg:'#ede9fe',fg:'#5b21b6'},
+  'Salary':            {bg:'#fef2f2',fg:'#991b1b'},
+  'Hiring Tips':       {bg:'#ecfdf5',fg:'#065f46'},
+  'Internship Tips':   {bg:'#fff7ed',fg:'#9a3412'},
+};
+const COLORS=['#2563eb','#f97316','#16a34a','#7c3aed','#dc2626','#d97706','#0891b2','#be185d'];
+function cs(c){const s=CC[c]||{bg:'#f9fafb',fg:'#374151'};return`background:${s.bg};color:${s.fg}`}
+function cc(c,i){return(CC[c]||{fg:COLORS[i%COLORS.length]}).fg}
+
+// STATE
+let CUR='naukri',ALL=[],FILT=[],SC='d',SD=-1,SHOWALL=false;
+const TODAY='2026-05-20';
+
+// INIT
+setRange(30);
+
+// ════ UI ════
+function pickSite(el){
+  document.querySelectorAll('.site-pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  CUR=el.dataset.k;
+  // Update nav
+  document.getElementById('nav-naukri').style.cssText=CUR==='naukri'?'border-left:3px solid #f97316;background:rgba(249,115,22,.08);color:#fbd38d':'';
+  document.getElementById('nav-internshala').style.cssText=CUR==='internshala'?'border-left:3px solid #3b82f6;background:rgba(59,130,246,.1);color:#93c5fd':'';
+}
+
+function quickSite(k){
+  CUR=k;
+  document.querySelectorAll('.site-pill').forEach(p=>{p.classList.toggle('active',p.dataset.k===k)});
+  document.getElementById('nav-naukri').style.cssText=k==='naukri'?'border-left:3px solid #f97316;background:rgba(249,115,22,.08);color:#fbd38d':'';
+  document.getElementById('nav-internshala').style.cssText=k==='internshala'?'border-left:3px solid #3b82f6;background:rgba(59,130,246,.1);color:#93c5fd':'';
+  runAnalysis();
+}
+
+function quickRange(n){
+  document.querySelectorAll('.nav-sub').forEach(s=>s.classList.remove('active'));
+  event.target.classList.add('active');
+  setRange(n);
+  if(ALL.length)runAnalysis();
+}
+
+function setRange(n,btn){
+  document.querySelectorAll('.dq-btn').forEach(b=>b.classList.remove('on'));
+  if(btn)btn.classList.add('on');
+  const to=new Date(TODAY);
+  document.getElementById('dt').value=to.toISOString().slice(0,10);
+  if(!n){document.getElementById('df').value='2015-01-01';return;}
+  const fr=new Date(TODAY);fr.setDate(fr.getDate()-n);
+  document.getElementById('df').value=fr.toISOString().slice(0,10);
+}
+
+function setLoading(on){
+  const b=document.getElementById('rbtn');b.disabled=on;
+  document.getElementById('rico').innerHTML=on?'<span class="spin"></span>':'▶';
+  document.getElementById('rtxt').textContent=on?'Loading…':'Get Data';
+  document.getElementById('pwrap').style.display=on?'block':'none';
+  document.getElementById('topbar-status').textContent=on?'Fetching…':(ALL.length?`${ALL.length} posts`:'Ready');
+}
+
+function setProg(pct,label){
+  document.getElementById('pfill').style.width=pct+'%';
+  document.getElementById('plabel').textContent=label;
+}
+
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function slug(u){try{return new URL(u).pathname.replace(/^\/blog\//,'').replace(/\/$/,'')}catch{return u}}
+function diffDays(a,b){return Math.max(1,Math.ceil((new Date(b)-new Date(a))/864e5))}
+
+// ════ GLOBAL SEARCH ════
+function globalSearch(){
+  const q=document.getElementById('global-search').value.toLowerCase();
+  if(!ALL.length)return;
+  FILT=q?ALL.filter(p=>p.u.toLowerCase().includes(q)||p.t.toLowerCase().includes(q)||p.c.toLowerCase().includes(q)):[...ALL];
+  const si=document.getElementById('tbl-srch');if(si)si.value=q;
+  renderTable();
+}
+
+// ════ MAIN RUN ════
+async function runAnalysis(){
+  const fr=document.getElementById('df').value;
+  const to=document.getElementById('dt').value;
+  setLoading(true);setProg(20,'Filtering data…');
+  await new Promise(r=>setTimeout(r,100));
+  setProg(60,'Building analytics…');
+  await new Promise(r=>setTimeout(r,80));
+  ALL=DB[CUR].filter(p=>{
+    if(!p.d)return false;
+    if(fr&&p.d<fr)return false;
+    if(to&&p.d>to)return false;
+    return true;
+  }).sort((a,b)=>b.d.localeCompare(a.d));
+  FILT=[...ALL];SHOWALL=false;SC='d';SD=-1;
+  setProg(100,'Done');
+  await new Promise(r=>setTimeout(r,200));
+  setLoading(false);
+  document.getElementById('topbar-status').textContent=`${ALL.length} posts found`;
+  document.getElementById('empty-state').style.display='none';
+  document.getElementById('results-area').style.display='block';
+  renderAll(fr,to);
+}
+
+// ════ RENDER ════
+function renderAll(fr,to){
+  const site={naukri:{name:'Naukri.com',color:'#f97316',colorLight:'#fff7ed'},internshala:{name:'Internshala.com',color:'#2563eb',colorLight:'#eff6ff'}}[CUR];
+  const days=fr&&to?diffDays(fr,to):180;
+  const apd=(ALL.length/days).toFixed(1);
+  const cats={};ALL.forEach(p=>cats[p.c]=(cats[p.c]||0)+1);
+  const topCat=Object.entries(cats).sort((a,b)=>b[1]-a[1])[0]?.[0]||'—';
+  const clusters=detectClusters(ALL);
+  const tl=buildTL(ALL);
+
+  // Insight
+  let insight='';
+  const bc=clusters[0];
+  if(bc&&bc.posts.length>=3)insight=`<strong>${site.name}</strong> is running a cluster strategy on "<strong>${bc.name}</strong>" — ${bc.posts.length} posts on this topic alone (${Math.round(bc.posts.length/ALL.length*100)}% of output). This is a deliberate SEO push you can counter.`;
+  else if(ALL.length>0)insight=`<strong>${site.name}</strong> published <strong>${ALL.length} posts</strong> between ${fr} and ${to} — averaging <strong>${apd} posts/day</strong>. Their biggest focus: <strong>${topCat}</strong> (${cats[topCat]||0} posts).`;
+
+  document.getElementById('results-area').innerHTML=`
+<!-- INSIGHT BANNER -->
+${insight?`<div class="insight-card anim">
+  <div class="insight-icon-wrap">💡</div>
+  <div>
+    <div class="insight-title">Intelligence Summary</div>
+    <div class="insight-body">${insight}</div>
+  </div>
+</div>`:''}
+
+<!-- STATS -->
+<div class="stats-strip anim anim-1">
+  <div class="stat-card">
+    <div class="stat-card-accent" style="background:${site.color}"></div>
+    <div class="stat-card-icon" style="background:${site.colorLight}">${CUR==='naukri'?'🔶':'🔵'}</div>
+    <div class="stat-value" id="sv0">—</div>
+    <div class="stat-label">Posts in Range</div>
+    <div class="stat-delta neu">${fr} → ${to}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card-accent" style="background:#2563eb"></div>
+    <div class="stat-card-icon" style="background:#eff6ff">📅</div>
+    <div class="stat-value">${apd}</div>
+    <div class="stat-label">Avg Posts / Day</div>
+    <div class="stat-delta neu">Over ${days} days</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card-accent" style="background:#7c3aed"></div>
+    <div class="stat-card-icon" style="background:#f5f3ff">🗂</div>
+    <div class="stat-value">${Object.keys(cats).length}</div>
+    <div class="stat-label">Categories</div>
+    <div class="stat-delta neu">Top: ${topCat}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card-accent" style="background:#16a34a"></div>
+    <div class="stat-card-icon" style="background:#f0fdf4">🎯</div>
+    <div class="stat-value">${clusters.length}</div>
+    <div class="stat-label">Clusters Detected</div>
+    <div class="stat-delta up">Topic patterns found</div>
+  </div>
+</div>
+
+<!-- CHARTS -->
+<div class="two-col anim anim-2">
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">Publishing Timeline</div>
+        <div class="card-subtitle">Posts published per ${tl.gb} · ${tl.data.length} ${tl.gb==='week'?'weeks':'days'}</div>
+      </div>
+      <span class="card-badge" style="border-color:${site.color}20;color:${site.color};background:${site.colorLight}">${site.name}</span>
+    </div>
+    ${renderTL(tl.data,site.color)}
+  </div>
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Category Breakdown</div><div class="card-subtitle">${Object.keys(cats).length} categories</div></div></div>
+    ${renderLegend(cats,ALL.length)}
+  </div>
+</div>
+
+<div class="card card-full anim anim-2">
+  <div class="card-header"><div><div class="card-title">Category Distribution</div><div class="card-subtitle">Posts per category in selected range</div></div></div>
+  ${renderCatBars(cats,site.color)}
+</div>
+
+<!-- CLUSTERS -->
+${clusters.length?`
+<div class="sec-hd anim anim-3">
+  <div class="sec-hd-left">
+    <div class="sec-hd-title">Content Clusters Detected</div>
+    <span class="sec-hd-count">${clusters.length} patterns</span>
+  </div>
+</div>
+<div class="cluster-grid anim anim-3">
+  ${clusters.map(cl=>`<div class="cluster-card" onclick="filterCluster('${esc(cl.kw)}')">
+    <div class="cc-header">
+      <div class="cc-name">${esc(cl.name)}</div>
+      <span class="cc-badge">${cl.posts.length} posts</span>
+    </div>
+    <div class="cc-date">Latest: ${cl.posts[0]?.d||''}</div>
+    <div class="cc-tags">${cl.posts.slice(0,3).map(p=>`<span class="cc-tag">${esc(slug(p.u).slice(0,24))}</span>`).join('')}${cl.posts.length>3?`<span class="cc-tag">+${cl.posts.length-3}</span>`:''}</div>
+  </div>`).join('')}
+</div>`:''}
+
+<!-- TABLE -->
+<div class="sec-hd anim anim-4">
+  <div class="sec-hd-left">
+    <div class="sec-hd-title">All Posts</div>
+    <span class="sec-hd-count" id="tc">${ALL.length} posts</span>
+  </div>
+</div>
+<div class="table-toolbar anim anim-4">
+  <div class="tbl-srch-wrap">
+    <span class="sico">🔍</span>
+    <input class="tbl-srch" id="tbl-srch" placeholder="Search title, URL, category…" oninput="applyF()">
+  </div>
+  <select class="tbl-sel" id="cat-sel" onchange="applyF()">
+    <option value="">All categories</option>
+    ${Object.keys(cats).sort().map(c=>`<option value="${esc(c)}">${esc(c)} (${cats[c]})</option>`).join('')}
+  </select>
+  <button class="tbl-action" onclick="cpAll()">📋 Copy URLs</button>
+  <button class="tbl-action" onclick="dlCSV()">⬇ Export CSV</button>
+</div>
+<div class="filter-note" id="fn"></div>
+<div class="tbl-wrap anim anim-4">
+  <div class="tbl-head">
+    <div class="th-cell">#</div>
+    <div class="th-cell" onclick="srt('t')">Title / Slug ↕</div>
+    <div class="th-cell" onclick="srt('d')">Date ↕</div>
+    <div class="th-cell">Category</div>
+  </div>
+  <div class="tbl-body" id="tbl-body"></div>
+  <div class="tbl-footer" id="tbl-ft"><span id="ft-txt"></span><button class="tbl-action" onclick="seeAll()">Show all</button></div>
+</div>`;
+
+  animN('sv0',ALL.length);
+  renderTable();
+}
+
+// ════ TIMELINE ════
+function buildTL(data){
+  const cnt={};data.forEach(p=>cnt[p.d]=(cnt[p.d]||0)+1);
+  const dates=Object.keys(cnt).sort();
+  if(!dates.length)return{data:[],gb:'day'};
+  const span=dates.length>1?(new Date(dates[dates.length-1])-new Date(dates[0]))/864e5:0;
+  if(span>50){
+    const wks={};
+    data.forEach(p=>{const d=new Date(p.d);d.setDate(d.getDate()-d.getDay());const k=d.toISOString().slice(0,10);wks[k]=(wks[k]||0)+1;});
+    return{data:Object.entries(wks).sort((a,b)=>a[0].localeCompare(b[0])).slice(-22).map(([d,v])=>({l:d.slice(5),v})),gb:'week'};
+  }
+  return{data:dates.slice(-28).map(d=>({l:d.slice(5),v:cnt[d]})),gb:'day'};
+}
+function renderTL(data,color){
+  if(!data.length)return`<div style="padding:28px;text-align:center;color:var(--ink4);font-size:13px">No data in this range</div>`;
+  const mx=Math.max(...data.map(d=>d.v),1);
+  return`<div class="tl-bars">${data.map(d=>`<div class="tl-bw" title="${d.l}: ${d.v} posts">
+    <div class="tl-b" style="height:${Math.max(3,Math.round(d.v/mx*85))}px;background:${color}33" onmouseover="this.style.background='${color}'" onmouseout="this.style.background='${color}33'">
+      ${d.v>0?`<span class="tl-v">${d.v}</span>`:''}
+    </div>
+    <div class="tl-l">${d.l}</div>
+  </div>`).join('')}</div>`;
+}
+
+// ════ CATEGORY CHARTS ════
+function renderCatBars(cats,color){
+  const sorted=Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const mx=Math.max(...sorted.map(e=>e[1]),1);
+  return`<div class="cat-rows">${sorted.map(([c,n],i)=>`<div class="cat-r">
+    <div class="cat-r-meta">
+      <span class="cat-r-name">${esc(c)}</span>
+      <span class="cat-r-count">${n} posts</span>
+    </div>
+    <div class="cat-r-track"><div class="cat-r-fill" style="width:${Math.round(n/mx*100)}%;background:${cc(c,i)}"></div></div>
+  </div>`).join('')}</div>`;
+}
+
+function renderLegend(cats,total){
+  const sorted=Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,7);
+  return`<div class="legend-list">${sorted.map(([c,n],i)=>`<div class="legend-row">
+    <span class="legend-dot" style="background:${cc(c,i)}"></span>
+    <span class="legend-name">${esc(c)}</span>
+    <span class="legend-pct">${Math.round(n/total*100)}%</span>
+    <span class="legend-count">${n}</span>
+  </div>`).join('')}</div>`;
+}
+
+// ════ CLUSTERS ════
+function detectClusters(data){
+  const kw={};
+  data.forEach(p=>{
+    const s=slug(p.u);const pts=s.split('-');
+    for(let i=0;i<pts.length-1;i++){const bi=pts[i]+'-'+pts[i+1];if(bi.length>7)kw[bi]=(kw[bi]||0)+1;}
+    if(pts[0].length>4)kw[pts[0]]=(kw[pts[0]]||0)+1;
+  });
+  return Object.entries(kw).filter(([,v])=>v>=2).sort((a,b)=>b[1]-a[1]).slice(0,8)
+    .map(([k])=>{const posts=data.filter(p=>slug(p.u).includes(k)).slice(0,8);if(posts.length<2)return null;return{kw:k,name:k.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase()),posts};}).filter(Boolean);
+}
+function filterCluster(kw){
+  const s=document.getElementById('tbl-srch');if(s){s.value=kw.replace(/-/g,' ');applyF();}
+  document.getElementById('tbl-body')?.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ════ TABLE ════
+function applyF(){
+  const q=(document.getElementById('tbl-srch')?.value||'').toLowerCase();
+  const cat=document.getElementById('cat-sel')?.value||'';
+  FILT=ALL.filter(p=>{
+    if(q&&!p.u.toLowerCase().includes(q)&&!p.t.toLowerCase().includes(q)&&!p.c.toLowerCase().includes(q))return false;
+    if(cat&&p.c!==cat)return false;
+    return true;
+  });
+  SHOWALL=false;
+  const fn=document.getElementById('fn');if(fn)fn.textContent=(q||cat)?`Showing ${FILT.length} of ${ALL.length} posts`:'';
+  const tc=document.getElementById('tc');if(tc)tc.textContent=(q||cat)?`${FILT.length} filtered`:`${ALL.length} posts`;
+  renderTable();
+}
+function srt(col){if(SC===col)SD*=-1;else SC=col;renderTable();}
+function seeAll(){SHOWALL=true;renderTable();}
+
+function renderTable(){
+  const sorted=[...FILT].sort((a,b)=>SC==='d'?SD*b.d.localeCompare(a.d):SD*a.t.localeCompare(b.t));
+  const display=SHOWALL?sorted:sorted.slice(0,150);
+  const body=document.getElementById('tbl-body');if(!body)return;
+  const cutNew=new Date(TODAY);cutNew.setDate(cutNew.getDate()-7);
+  const c7=cutNew.toISOString().slice(0,10);
+  body.innerHTML=display.map((p,i)=>`<div class="tr">
+    <div class="td-num">${i+1}</div>
+    <div class="td-url">
+      <a href="${esc(p.u)}" target="_blank" rel="noopener">${esc(p.t)}${p.d>=c7?'<span class="new-chip">NEW</span>':''}</a>
+      <div class="td-slug">${esc(slug(p.u))}</div>
+    </div>
+    <div class="td-date">${p.d}</div>
+    <div class="td-cat"><span class="cat-chip" style="${cs(p.c)}">${esc(p.c)}</span></div>
+  </div>`).join('');
+  const ft=document.getElementById('tbl-ft');
+  if(ft){if(!SHOWALL&&sorted.length>150){document.getElementById('ft-txt').textContent=`Showing 150 of ${sorted.length} posts`;ft.style.display='flex';}else ft.style.display='none';}
+}
+
+function cpAll(){
+  const txt=FILT.map(p=>p.u).join('\n');
+  navigator.clipboard.writeText(txt).catch(()=>{const t=document.createElement('textarea');t.value=txt;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();});
+  const b=event.currentTarget,o=b.innerHTML;b.innerHTML='✅ Copied!';setTimeout(()=>b.innerHTML=o,1800);
+}
+function dlCSV(){
+  const rows=FILT.map(p=>`"${esc(p.u)}","${esc(p.t)}","${p.d}","${esc(p.c)}"`).join('\n');
+  const blob=new Blob(['URL,Title,Date,Category\n'+rows],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`blog_intel_${CUR}_${TODAY}.csv`;a.click();
+}
+function animN(id,n){
+  const el=document.getElementById(id);if(!el)return;
+  let c=0;const s=Math.ceil(n/25);
+  const iv=setInterval(()=>{c=Math.min(c+s,n);el.textContent=c.toLocaleString();if(c>=n)clearInterval(iv)},28);
+}
+function switchView(v){} // placeholder for future nav
+</script>
+</body>
+</html>
