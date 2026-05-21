@@ -1,12 +1,9 @@
-name: Update Blog Data Daily
+name: Update Blog Intel Data Daily
 
 on:
   schedule:
-    - cron: '0 3 * * *'
-  workflow_dispatch:
-
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    - cron: '0 3 * * *'   # 8:30 AM IST = 03:00 UTC
+  workflow_dispatch:        # Manual trigger from Actions tab
 
 jobs:
   update:
@@ -15,7 +12,7 @@ jobs:
       contents: write
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Set up Python
@@ -23,19 +20,13 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
-        run: pip install requests
+      - name: Fetch all RSS feeds & inject into index.html
+        run: python3 fetch_and_inject.py
 
-      - name: Fetch latest blog data
-        run: python fetch_data.py
-
-      - name: Update HTML with new data
-        run: python inject_data.py
-
-      - name: Commit and push if data changed
+      - name: Commit updated index.html
         run: |
-          git config --global user.email "action@github.com"
-          git config --global user.name "Blog Intel Bot"
-          git add data/naukri.json data/internshala.json index.html
-          git diff --staged --quiet || git commit -m "Auto-update: $(date +'%Y-%m-%d') blog data refresh"
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --staged --quiet || git commit -m "chore: auto-update blog data $(date +'%Y-%m-%d')"
           git push
