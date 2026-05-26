@@ -226,17 +226,18 @@ def scrape_internshala_html(url):
         if not title:
             title = slug.replace('-', ' ').title()
 
-        # Extract date from card
-        date = TODAY
+        # Extract date from card — ONLY use found date, never default to TODAY
+        # (defaulting to TODAY causes old articles to appear as published today)
+        date = None
         date_m = re.search(
             r'(\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\w*\s+\d{4}'
             r'|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\w*\s+\d{1,2},?\s+\d{4})',
             snippet, re.IGNORECASE)
         if date_m:
-            parsed = parse_human_date(date_m.group(1))
-            if parsed: date = parsed
+            date = parse_human_date(date_m.group(1))
 
-        if len(title) > 4:
+        # Only add post if we found a real date (avoids polluting with wrong dates)
+        if len(title) > 4 and date:
             posts.append({'u': full_url, 't': title, 'd': date, 'c': guess_cat(title, full_url)})
 
     return posts
@@ -271,6 +272,7 @@ def fetch_internshala():
     # (sitemap lastmod is often stale/wrong for new posts, RSS only gives 10)
     print('    Scraping blog listing pages for latest articles...')
     blog_pages = [
+        'https://internshala.com/blog/latest-posts/',   # dedicated latest page
         'https://internshala.com/blog/',
         'https://internshala.com/blog/page/2/',
         'https://internshala.com/blog/page/3/',
