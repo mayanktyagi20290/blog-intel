@@ -1,29 +1,42 @@
 #!/usr/bin/env python3
 """Competitor blog tracker: weekly new-post counts per competitor/category.
-Reads competitors.csv (Category, Competitor, Blog URL, Sitemap override), crawls sitemaps
-(fallback: RSS), buckets posts by lastmod/pubDate into Monday-based weeks, merges into
-history.json (so history survives sitemap changes) and writes data.json for the dashboard."""
-import csv, gzip, json, os, re, sys, urllib.request
+Reads competitors.csv (Category, Competitor, Blog URL, Sitemap override), discovers sitemaps
+(robots.txt, common paths, www/non-www, RSS via <link rel=alternate>), buckets posts by
+lastmod/pubDate into Monday-based weeks. If a sitemap has no dates, uses first-seen tracking
+(seen.json). History merges into history.json; dashboard reads data.json."""
+import csv, gzip, json, os, re, urllib.request, urllib.error
+from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 WEEKS = 12
-UA = 'Mozilla/5.0 (compatible; BlogIntelTracker/1.0)'
-MAX_SITEMAPS = 25
+MAX_SITEMAPS = 30
+UA = ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+      'Chrome/124.0.0.0 Safari/537.36')
+HDR = {'User-Agent': UA, 'Accept': 'application/xml,text/xml,text/html,*/*;q=0.8',
+       'Accept-Language': 'en-US,en;q=0.9'}
+COMMON = ['/sitemap_index.xml', '/sitemap-index.xml', '/sitemap.xml', '/wp-sitemap.xml',
+          '/post-sitemap.xml', '/blog-sitemap.xml', '/sitemap-posts.xml', '/sitemap-0.xml',
+          '/blog/sitemap.xml', '/blog/sitemap_index.xml', '/blog/post-sitemap.xml',
+          '/blog/sitemap-index.xml', '/sitemap.xml.gz']
 
 
-def get(url, timeout=20):
+def get(url, codes=None, timeout=20):
     try:
-        req = urllib.request.Request(url, headers={'User-Agent': UA, 'Accept': '*/*'})
-        with urllib.request.urlopen(req, timeout=timeout) as r:
+        with urllib.request.urlopen(urllib.request.Request(url, headers=HDR), timeout=timeout) as r:
             raw = r.read()
         if raw[:2] == b'\x1f\x8b':
             raw = gzip.decompress(raw)
         return raw.decode('utf-8', errors='replace')
+    except urllib.error.HTTPError as e:
+        if codes is not None:
+            codes.append(e.code)
     except Exception:
-        return None
+        if codes is not None:
+            codes.append('net')
+    return None
 
 
 def parse_dt(s):
@@ -53,25 +66,26 @@ def week_starts():
     return [monday - timedelta(weeks=i) for i in range(WEEKS - 1, -1, -1)]
 
 
-def sitemap_roots(origin, override):
-    if override:
-        return [x for x in re.split(r'[\s,]+', override) if x]
-    roots = []
-    txt = get(origin + '/robots.txt') or ''
-    roots += re.findall(r'(?im)^sitemap:\s*(\S+)', txt)
-    return roots or [origin + '/sitemap.xml']
+def bare(u):
+    return re.sub(r'^https?://(www\.)?', '', u)
 
 
-def collect_sitemap(blog, override, cutoff):
-    m = re.match(r'https?://[^/]+', blog)
-    origin, prefix = m.group(0), blog[m.end():].rstrip('/')
-    queue, seen_s, seen_u, out = sitemap_roots(origin, override), set(), set(), []
+def hosts(origin):
+    """origin plus its www/non-www twin."""
+    h = re.sub(r'^https?://', '', origin)
+    alt = h[4:] if h.startswith('www.') else 'www.' + h
+    return [origin, 'https://' + alt]
+
+
+def crawl(roots, origin, prefix, cutoff, codes):
+    queue, seen_s, seen_u, out = list(roots), set(), set(), []
+    base = bare(origin) + prefix
     while queue and len(seen_s) < MAX_SITEMAPS:
         s = queue.pop(0)
         if s in seen_s:
             continue
         seen_s.add(s)
-        xml = get(s)
+        xml = get(s, codes)
         if not xml:
             continue
         for b in re.findall(r'<sitemap>[\s\S]*?</sitemap>', xml):
@@ -85,23 +99,51 @@ def collect_sitemap(blog, override, cutoff):
         for b in re.findall(r'<url>[\s\S]*?</url>', xml):
             loc = tag(b, 'loc')
             norm = loc.rstrip('/')
-            if loc.startswith(origin + prefix + '/') and norm != origin + prefix and norm not in seen_u:
+            if bare(loc).startswith(base + '/') and bare(norm) != base and norm not in seen_u:
                 seen_u.add(norm)
                 out.append((norm, parse_dt(tag(b, 'lastmod'))))
     return out
 
 
-def collect_rss(blog):
+def collect_sitemap(blog, override, cutoff, codes):
+    m = re.match(r'https?://[^/]+', blog)
+    origin, prefix = m.group(0), blog[m.end():].rstrip('/')
+    if override:
+        return crawl([x for x in re.split(r'[\s,]+', override) if x], origin, prefix, cutoff, codes)
+    roots = []
+    for h in hosts(origin):
+        roots += re.findall(r'(?im)^sitemap:\s*(\S+)', get(h + '/robots.txt', codes) or '')
+    out = crawl(roots, origin, prefix, cutoff, codes) if roots else []
+    if not out:  # probe common locations
+        cands = []
+        for h in hosts(origin):
+            cands += [h + p for p in COMMON]
+            if prefix:
+                cands += [h + prefix + p for p in ('/sitemap.xml', '/sitemap_index.xml', '/post-sitemap.xml')]
+        out = crawl(list(dict.fromkeys(cands)), origin, prefix, cutoff, codes)
+    return out
+
+
+def collect_rss(blog, codes):
     m = re.match(r'https?://[^/]+', blog)
     origin, base = m.group(0), blog.rstrip('/')
+    feeds = []
+    page = get(base, codes) or ''
+    for h in re.findall(r'<link[^>]+type="application/(?:rss|atom)\+xml"[^>]*>', page):
+        href = re.search(r'href="([^"]+)"', h)
+        if href:
+            u = href.group(1)
+            feeds.append(u if u.startswith('http') else origin + (u if u.startswith('/') else '/' + u))
+    feeds += [base + '/feed', base + '/feed/', base + '/rss.xml', base + '/feed.xml', base + '/rss',
+              origin + '/feed', origin + '/rss.xml', origin + '/blog/feed', origin + '/blog/rss.xml']
     out = {}
-    for f in (base + '/feed', base + '/feed/', base + '/rss.xml', base + '/feed.xml', origin + '/feed', origin + '/rss.xml'):
-        xml = get(f)
-        if not xml or '<item' not in xml and '<entry' not in xml:
+    for f in dict.fromkeys(feeds):
+        xml = get(f, codes)
+        if not xml or ('<item' not in xml and '<entry' not in xml):
             continue
-        for b in re.findall(r'<item>[\s\S]*?</item>|<entry>[\s\S]*?</entry>', xml):
+        for b in re.findall(r'<item[ >][\s\S]*?</item>|<entry[ >][\s\S]*?</entry>', xml):
             link = tag(b, 'link') or (re.search(r'<link[^>]+href="([^"]+)"', b) or [None, ''])[1]
-            dt = parse_dt(tag(b, 'pubDate') or tag(b, 'published') or tag(b, 'updated'))
+            dt = parse_dt(tag(b, 'pubDate') or tag(b, 'published') or tag(b, 'updated') or tag(b, 'dc:date'))
             if link and dt:
                 out[link.rstrip('/')] = dt
         if out:
@@ -109,46 +151,66 @@ def collect_rss(blog):
     return list(out.items())
 
 
-def process(row, weeks):
+def process(row, weeks, seen):
     cat, name, blog, override = (row + ['', '', '', ''])[:4]
-    counts, latest, status = [0] * len(weeks), None, 'OK'
+    counts, latest, status, codes = [0] * len(weeks), None, 'OK', []
     first = datetime.combine(weeks[0], datetime.min.time(), tzinfo=timezone.utc)
+    now = datetime.now(timezone.utc)
     try:
-        urls = collect_sitemap(blog, override.strip(), first)
+        urls = collect_sitemap(blog, override.strip(), first, codes)
         dated = [(u, d) for u, d in urls if d]
         if not dated:
-            rss = collect_rss(blog)
+            rss = collect_rss(blog, codes)
             if rss:
                 dated, status = rss, 'RSS only (latest posts, partial)'
-            elif urls:
-                status = 'Sitemap has no lastmod'
+            elif urls:  # sitemap without lastmod -> first-seen tracking
+                s = seen.get(name)
+                if s is None:
+                    seen[name] = {u: 'base' for u, _ in urls}
+                    status = 'First-seen tracking started (counts from next run)'
+                else:
+                    for u, _ in urls:
+                        if u not in s:
+                            s[u] = now.date().isoformat()
+                    dated = [(u, parse_dt(d)) for u, d in s.items() if d != 'base']
+                    status = 'First-seen tracking (no lastmod in sitemap)'
             else:
-                status = 'No sitemap/RSS found (add override)'
+                top = Counter(codes).most_common(1)
+                why = {403: 'blocked 403', 404: 'not at common paths', 'net': 'network/timeout'}.get(top[0][0] if top else None, '')
+                status = 'No sitemap/RSS found' + (' (%s)' % why if why else '') + ' - add override'
         for _, d in dated:
-            if latest is None or d > latest:
-                latest = d
-            idx = (d.date() - weeks[0]).days // 7
-            if 0 <= idx < len(weeks):
-                counts[idx] += 1
+            if d:
+                if latest is None or d > latest:
+                    latest = d
+                idx = (d.date() - weeks[0]).days // 7
+                if 0 <= idx < len(weeks):
+                    counts[idx] += 1
     except Exception as e:
         status = 'Error: %s' % str(e)[:60]
     return {'category': cat, 'name': name, 'blog': blog, 'counts': counts,
             'latest': latest.date().isoformat() if latest else '', 'status': status}
 
 
+def load(p, default):
+    return json.load(open(p)) if os.path.exists(p) else default
+
+
 def main():
     weeks = week_starts()
     with open(os.path.join(HERE, 'competitors.csv'), newline='', encoding='utf-8') as f:
         rows = [r for r in list(csv.reader(f))[1:] if len(r) > 2 and r[1].strip() and r[2].strip()]
+    sp = os.path.join(HERE, 'seen.json')
+    seen = load(sp, {})
     with ThreadPoolExecutor(6) as ex:
-        results = list(ex.map(lambda r: process(r, weeks), rows))
+        results = list(ex.map(lambda r: process(r, weeks, seen), rows))
+    json.dump(seen, open(sp, 'w'))
 
     hp = os.path.join(HERE, 'history.json')
-    hist = json.load(open(hp)) if os.path.exists(hp) else {}
+    hist = load(hp, {})
     for r in results:
         h = hist.setdefault(r['name'], {'category': r['category'], 'blog': r['blog'], 'weeks': {}})
         h['category'], h['blog'] = r['category'], r['blog']
-        if r['status'] in ('OK',) or r['status'].startswith('RSS'):
+        if r['status'] == 'OK' or r['status'].startswith(('RSS', 'First-seen')):
             for w, c in zip(weeks, r['counts']):
                 k = w.isoformat()
                 h['weeks'][k] = max(h['weeks'].get(k, 0), c)
@@ -159,14 +221,13 @@ def main():
         hw = hist[r['name']]['weeks']
         counts = [hw.get(w.isoformat(), 0) for w in weeks]
         out_rows.append({**r, 'counts': counts, 'total': sum(counts)})
-    data = {'generated': datetime.now(timezone.utc).isoformat(timespec='minutes'),
-            'weeks': [w.isoformat() for w in weeks], 'rows': out_rows}
-    json.dump(data, open(os.path.join(HERE, 'data.json'), 'w'), indent=1)
-    ok = sum(1 for r in results if r['status'] == 'OK')
-    print('Done: %d competitors, %d OK, %d need attention' % (len(results), ok, len(results) - ok))
-    for r in results:
-        if r['status'] != 'OK':
-            print('  -', r['name'], '|', r['status'])
+    json.dump({'generated': datetime.now(timezone.utc).isoformat(timespec='minutes'),
+               'weeks': [w.isoformat() for w in weeks], 'rows': out_rows},
+              open(os.path.join(HERE, 'data.json'), 'w'), indent=1)
+    bad = [r for r in results if r['status'] != 'OK']
+    print('Done: %d competitors, %d OK, %d need attention' % (len(results), len(results) - len(bad), len(bad)))
+    for r in bad:
+        print('  -', r['name'], '|', r['status'])
 
 
 if __name__ == '__main__':
