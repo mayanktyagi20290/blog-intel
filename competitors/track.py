@@ -4,7 +4,7 @@ Reads competitors.csv (Category, Competitor, Blog URL, Sitemap override), discov
 (robots.txt, common paths, www/non-www, RSS via <link rel=alternate>), buckets posts by
 lastmod/pubDate into Monday-based weeks. If a sitemap has no dates, uses first-seen tracking
 (seen.json). History merges into history.json; dashboard reads data.json."""
-import csv, gzip, json, os, re, urllib.request, urllib.error
+import csv, gzip, json, os, re, threading, time, urllib.request, urllib.error
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
@@ -13,6 +13,8 @@ from email.utils import parsedate_to_datetime
 HERE = os.path.dirname(os.path.abspath(__file__))
 WEEKS = 12
 MAX_SITEMAPS = 30
+PER_SITE_SECONDS = 75
+TL = threading.local()
 UA = ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
       'Chrome/124.0.0.0 Safari/537.36')
 HDR = {'User-Agent': UA, 'Accept': 'application/xml,text/xml,text/html,*/*;q=0.8',
@@ -23,7 +25,11 @@ COMMON = ['/sitemap_index.xml', '/sitemap-index.xml', '/sitemap.xml', '/wp-sitem
           '/blog/sitemap-index.xml', '/sitemap.xml.gz']
 
 
-def get(url, codes=None, timeout=20):
+def get(url, codes=None, timeout=8):
+    if time.time() > getattr(TL, 'deadline', 1e18):
+        return None
+    if codes is not None and len(codes) >= 4 and all(c == 403 for c in codes):
+        return None  # site is blocking us; stop probing
     try:
         with urllib.request.urlopen(urllib.request.Request(url, headers=HDR), timeout=timeout) as r:
             raw = r.read()
@@ -152,6 +158,7 @@ def collect_rss(blog, codes):
 
 
 def process(row, weeks, seen):
+    TL.deadline = time.time() + PER_SITE_SECONDS
     cat, name, blog, override = (row + ['', '', '', ''])[:4]
     counts, latest, status, codes = [0] * len(weeks), None, 'OK', []
     first = datetime.combine(weeks[0], datetime.min.time(), tzinfo=timezone.utc)
@@ -207,7 +214,7 @@ def main():
         rows = [r for r in list(csv.reader(f))[1:] if len(r) > 2 and r[1].strip() and r[2].strip()]
     sp = os.path.join(HERE, 'seen.json')
     seen = load(sp, {})
-    with ThreadPoolExecutor(6) as ex:
+    with ThreadPoolExecutor(12) as ex:
         results = list(ex.map(lambda r: process(r, weeks, seen), rows))
     json.dump(seen, open(sp, 'w'))
 
