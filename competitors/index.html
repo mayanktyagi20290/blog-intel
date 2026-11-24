@@ -64,8 +64,8 @@ fetch('posts.json').then(r=>r.json()).then(p=>{P=p;
 function prows(){const since=new Date(Date.now()-pr.value*864e5).toISOString().slice(0,10),q=pq.value.toLowerCase();
  return P.filter(x=>x.d>=since&&(!pf.value||x.c===pf.value)&&(!pc.value||x.n===pc.value)&&(!q||x.t.toLowerCase().includes(q)));}
 function drawP(){const r=prows();pn.textContent=`${r.length} posts`+(r.length>500?' (showing latest 500, export CSV for all)':'');
- pt.innerHTML='<tr><th class="l">Date</th><th class="l">Competitor</th><th class="l">Category</th><th class="l">Post</th></tr>'+
- r.slice(0,500).map(x=>`<tr><td class="l">${x.d}</td><td class="l">${x.n}</td><td class="l">${x.c}</td><td class="l"><a href="${x.u}" target="_blank">${x.t||x.u}</a></td></tr>`).join('');}
+ pt.innerHTML='<tr><th class="l">Date</th><th class="l">Competitor</th><th class="l">Category</th><th class="l">Post</th><th class="l">URL</th></tr>'+
+ r.slice(0,500).map(x=>`<tr><td class="l">${x.d}</td><td class="l">${x.n}</td><td class="l">${x.c}</td><td class="l"><a href="${x.u}" target="_blank">${x.t||x.u}</a></td><td class="l"><a href="${x.u}" target="_blank">${x.u}</a></td></tr>`).join('');}
 pf.onchange=pc.onchange=pr.onchange=pq.oninput=drawP;
 pcsv.onclick=()=>{const t=[['Date','Competitor','Category','Title','URL'],...prows().map(x=>[x.d,x.n,x.c,x.t,x.u])].map(l=>l.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/csv'}));a.download='competitor-new-posts.csv';a.click();};
