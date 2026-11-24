@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Competitor Blog Tracker — Weekly</title>
+<style>
+body{font:14px system-ui,sans-serif;margin:0;background:#f7f8fa;color:#1a1a1a}
+header{padding:16px 24px;background:#fff;border-bottom:1px solid #e3e5e8}
+h1{margin:0;font-size:20px}h2{font-size:15px;margin:24px 0 8px}
+.sub{color:#666;font-size:12px;margin-top:4px}
+main{padding:0 24px 40px}
+table{border-collapse:collapse;background:#fff;width:100%;font-size:13px}
+th,td{padding:6px 8px;border-bottom:1px solid #eee;text-align:right;white-space:nowrap}
+th{background:#fafafa;position:sticky;top:0;cursor:pointer}
+td:first-child,th:first-child,td.l,th.l{text-align:left}
+.wrap{overflow:auto;max-height:70vh;border:1px solid #e3e5e8;border-radius:6px}
+.bar{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap}
+select,input,button{padding:6px 8px;border:1px solid #ccd;border-radius:6px;font:inherit;background:#fff}
+.st{color:#b45309;font-size:12px}
+a{color:#2563eb;text-decoration:none}
+</style></head><body>
+<header><h1>Competitor Blog Tracker</h1><div class="sub" id="meta">Loading…</div></header>
+<main>
+<h2>By category (new posts / week)</h2><div class="wrap"><table id="cat"></table></div>
+<h2>By competitor</h2>
+<div class="bar"><select id="f"><option value="">All categories</option></select>
+<input id="q" placeholder="Search competitor"><button id="csv">Export CSV</button></div>
+<div class="wrap"><table id="cmp"></table></div>
+<p class="sub">Counts come from sitemap lastmod (or RSS when sitemap has no dates), so updated posts can count as new. History accumulates in history.json; rows marked with a status need a sitemap override in competitors.csv.</p>
+</main>
+<script>
+let D,sortI=-1,asc=false;
+const lbl=w=>new Date(w).toLocaleDateString('en-GB',{day:'2-digit',month:'short'});
+const heat=(v,m)=>v?`style="background:rgba(37,99,235,${Math.min(.12+.6*v/(m||1),.75)});color:${v/(m||1)>.5?'#fff':'#000'}"`:'';
+fetch('data.json').then(r=>r.json()).then(d=>{D=d;
+ meta.textContent=`Updated ${d.generated.replace('T',' ')} UTC · ${d.rows.length} competitors · last ${d.weeks.length} weeks`;
+ [...new Set(d.rows.map(r=>r.category))].forEach(c=>f.add(new Option(c,c)));
+ drawCat();drawCmp();});
+function drawCat(){const cats={};D.rows.forEach(r=>{const c=cats[r.category]=cats[r.category]||D.weeks.map(()=>0);r.counts.forEach((v,i)=>c[i]+=v)});
+ const mx=Math.max(...Object.values(cats).flat(),1);
+ cat.innerHTML='<tr><th class="l">Category</th>'+D.weeks.map(w=>`<th>${lbl(w)}</th>`).join('')+'<th>Total</th><th>Avg/wk</th></tr>'+
+ Object.entries(cats).map(([k,a])=>{const t=a.reduce((x,y)=>x+y,0);return `<tr><td>${k}</td>${a.map(v=>`<td ${heat(v,mx)}>${v}</td>`).join('')}<td><b>${t}</b></td><td>${(t/a.length).toFixed(1)}</td></tr>`}).join('');}
+function rows(){let r=D.rows.filter(x=>(!f.value||x.category===f.value)&&x.name.toLowerCase().includes(q.value.toLowerCase()));
+ if(sortI>=0)r=[...r].sort((a,b)=>{const g=x=>sortI===0?x.name:sortI===1?x.category:sortI<=D.weeks.length+1?x.counts[sortI-2]:x.total;const A=g(a),B=g(b);return (A>B?1:A<B?-1:0)*(asc?1:-1)});
+ else r=[...r].sort((a,b)=>b.total-a.total);return r;}
+function drawCmp(){const r=rows(),mx=Math.max(...r.flatMap(x=>x.counts),1);
+ const H=['Competitor','Category',...D.weeks.map(lbl),'Total','Latest','Status'];
+ cmp.innerHTML='<tr>'+H.map((h,i)=>`<th class="${i<2||i>D.weeks.length+2?'l':''}" onclick="sortI=${i};asc=!asc;drawCmp()">${h}</th>`).join('')+'</tr>'+
+ r.map(x=>`<tr><td class="l"><a href="${x.blog}" target="_blank">${x.name}</a></td><td class="l">${x.category}</td>${x.counts.map(v=>`<td ${heat(v,mx)}>${v}</td>`).join('')}<td><b>${x.total}</b></td><td class="l">${x.latest}</td><td class="l st">${x.status==='OK'?'':x.status}</td></tr>`).join('');}
+f.onchange=q.oninput=drawCmp;
+csv.onclick=()=>{const r=rows(),h=['Competitor','Category','Blog',...D.weeks,'Total','Latest','Status'];
+ const t=[h,...r.map(x=>[x.name,x.category,x.blog,...x.counts,x.total,x.latest,x.status])].map(l=>l.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/csv'}));a.download='competitor-blogs.csv';a.click();};
+</script></body></html>
