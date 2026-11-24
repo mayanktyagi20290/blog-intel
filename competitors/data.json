@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-24T07:36+00:00",
+ "generated": "2026-11-24T10:03+00:00",
  "weeks": [
   "2026-09-07",
   "2026-09-14",
@@ -77,8 +77,8 @@
     0,
     0
    ],
-   "latest": "2026-11-04",
-   "status": "OK",
+   "latest": "",
+   "status": "No sitemap/RSS found (blocked 403) - add override",
    "total": 56
   },
   {
@@ -297,8 +297,8 @@
     0,
     0
    ],
-   "latest": "2026-10-26",
-   "status": "RSS only (latest posts, partial)",
+   "latest": "",
+   "status": "No sitemap/RSS found (not at common paths) - add override",
    "total": 7
   },
   {
@@ -471,11 +471,11 @@
     0,
     20,
     17,
-    12
+    19
    ],
-   "latest": "2026-11-23",
+   "latest": "2026-11-24",
    "status": "OK",
-   "total": 73
+   "total": 80
   },
   {
    "category": "ATS",
@@ -583,8 +583,8 @@
     0,
     0
    ],
-   "latest": "2026-08-20",
-   "status": "RSS only (latest posts, partial)",
+   "latest": "",
+   "status": "No sitemap/RSS found (not at common paths) - add override",
    "total": 0
   },
   {
@@ -803,7 +803,7 @@
     0,
     0
    ],
-   "latest": "2026-11-11",
+   "latest": "2026-10-20",
    "status": "OK",
    "total": 10
   },
@@ -914,7 +914,7 @@
     0
    ],
    "latest": "",
-   "status": "First-seen tracking started (counts from next run)",
+   "status": "First-seen tracking (no lastmod in sitemap)",
    "total": 0
   },
   {
@@ -977,11 +977,11 @@
     0,
     1,
     0,
-    1
+    2
    ],
-   "latest": "2026-11-23",
+   "latest": "2026-11-24",
    "status": "RSS only (latest posts, partial)",
-   "total": 10
+   "total": 11
   },
   {
    "category": "Proctoring",
@@ -1376,7 +1376,7 @@
     0
    ],
    "latest": "",
-   "status": "First-seen tracking started (counts from next run)",
+   "status": "First-seen tracking (no lastmod in sitemap)",
    "total": 0
   },
   {
@@ -1398,7 +1398,7 @@
     0
    ],
    "latest": "",
-   "status": "First-seen tracking started (counts from next run)",
+   "status": "First-seen tracking (no lastmod in sitemap)",
    "total": 0
   },
   {
@@ -1464,7 +1464,7 @@
     0
    ],
    "latest": "",
-   "status": "First-seen tracking started (counts from next run)",
+   "status": "First-seen tracking (no lastmod in sitemap)",
    "total": 0
   },
   {
@@ -1552,7 +1552,7 @@
     0
    ],
    "latest": "",
-   "status": "No sitemap/RSS found (network/timeout) - add override",
+   "status": "No sitemap/RSS found - add override",
    "total": 0
   },
   {
@@ -1596,7 +1596,7 @@
     0
    ],
    "latest": "",
-   "status": "First-seen tracking started (counts from next run)",
+   "status": "First-seen tracking (no lastmod in sitemap)",
    "total": 0
   },
   {
@@ -1618,7 +1618,7 @@
     0
    ],
    "latest": "",
-   "status": "First-seen tracking started (counts from next run)",
+   "status": "First-seen tracking (no lastmod in sitemap)",
    "total": 0
   },
   {
@@ -1771,8 +1771,8 @@
     2,
     0
    ],
-   "latest": "2026-11-19",
-   "status": "RSS only (latest posts, partial)",
+   "latest": "",
+   "status": "No sitemap/RSS found (blocked 403) - add override",
    "total": 12
   },
   {
