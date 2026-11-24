@@ -187,8 +187,14 @@ def process(row, weeks, seen):
                     counts[idx] += 1
     except Exception as e:
         status = 'Error: %s' % str(e)[:60]
-    return {'category': cat, 'name': name, 'blog': blog, 'counts': counts,
+    posts = [(u, d.date().isoformat()) for u, d in dated if d and d >= first]
+    return {'category': cat, 'name': name, 'blog': blog, 'counts': counts, 'posts': posts,
             'latest': latest.date().isoformat() if latest else '', 'status': status}
+
+
+def title_of(u):
+    slug = re.sub(r'\.\w{2,5}$', '', u.rstrip('/').split('/')[-1])
+    return re.sub(r'[-_]+', ' ', slug).strip().title()
 
 
 def load(p, default):
@@ -215,6 +221,15 @@ def main():
                 k = w.isoformat()
                 h['weeks'][k] = max(h['weeks'].get(k, 0), c)
     json.dump(hist, open(hp, 'w'), indent=1)
+
+    pp = os.path.join(HERE, 'posts.json')
+    store = {p['u']: p for p in load(pp, [])}
+    for r in results:
+        for u, d in r.pop('posts'):
+            store[u] = {'u': u, 'n': r['name'], 'c': r['category'], 'd': d, 't': title_of(u)}
+    cut = (weeks[0] - timedelta(weeks=14)).isoformat()
+    posts = sorted((p for p in store.values() if p['d'] >= cut), key=lambda p: p['d'], reverse=True)
+    json.dump(posts, open(pp, 'w'), separators=(',', ':'))
 
     out_rows = []
     for r in results:

@@ -24,6 +24,13 @@ a{color:#2563eb;text-decoration:none}
 <div class="bar"><select id="f"><option value="">All categories</option></select>
 <input id="q" placeholder="Search competitor"><button id="csv">Export CSV</button></div>
 <div class="wrap"><table id="cmp"></table></div>
+<h2>New posts (all competitors, one place)</h2>
+<div class="bar"><select id="pf"><option value="">All categories</option></select>
+<select id="pc"><option value="">All competitors</option></select>
+<select id="pr"><option value="7">Last 7 days</option><option value="14">Last 14 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option><option value="9999">All</option></select>
+<input id="pq" placeholder="Search title"><button id="pcsv">Export CSV</button></div>
+<div class="sub" id="pn"></div>
+<div class="wrap"><table id="pt"></table></div>
 <p class="sub">Counts come from sitemap lastmod (or RSS when sitemap has no dates), so updated posts can count as new. History accumulates in history.json; rows marked with a status need a sitemap override in competitors.csv.</p>
 </main>
 <script>
@@ -49,4 +56,17 @@ f.onchange=q.oninput=drawCmp;
 csv.onclick=()=>{const r=rows(),h=['Competitor','Category','Blog',...D.weeks,'Total','Latest','Status'];
  const t=[h,...r.map(x=>[x.name,x.category,x.blog,...x.counts,x.total,x.latest,x.status])].map(l=>l.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/csv'}));a.download='competitor-blogs.csv';a.click();};
+
+let P=[];
+fetch('posts.json').then(r=>r.json()).then(p=>{P=p;
+ [...new Set(p.map(x=>x.c))].sort().forEach(c=>pf.add(new Option(c,c)));
+ [...new Set(p.map(x=>x.n))].sort().forEach(c=>pc.add(new Option(c,c)));drawP();}).catch(()=>{pn.textContent='posts.json not generated yet — run the workflow once.'});
+function prows(){const since=new Date(Date.now()-pr.value*864e5).toISOString().slice(0,10),q=pq.value.toLowerCase();
+ return P.filter(x=>x.d>=since&&(!pf.value||x.c===pf.value)&&(!pc.value||x.n===pc.value)&&(!q||x.t.toLowerCase().includes(q)));}
+function drawP(){const r=prows();pn.textContent=`${r.length} posts`+(r.length>500?' (showing latest 500, export CSV for all)':'');
+ pt.innerHTML='<tr><th class="l">Date</th><th class="l">Competitor</th><th class="l">Category</th><th class="l">Post</th></tr>'+
+ r.slice(0,500).map(x=>`<tr><td class="l">${x.d}</td><td class="l">${x.n}</td><td class="l">${x.c}</td><td class="l"><a href="${x.u}" target="_blank">${x.t||x.u}</a></td></tr>`).join('');}
+pf.onchange=pc.onchange=pr.onchange=pq.oninput=drawP;
+pcsv.onclick=()=>{const t=[['Date','Competitor','Category','Title','URL'],...prows().map(x=>[x.d,x.n,x.c,x.t,x.u])].map(l=>l.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/csv'}));a.download='competitor-new-posts.csv';a.click();};
 </script></body></html>
